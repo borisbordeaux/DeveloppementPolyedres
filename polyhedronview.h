@@ -1,14 +1,15 @@
 #ifndef POLYHEDRONVIEW_H
 #define POLYHEDRONVIEW_H
 
-#include "myopenglwidget.h"
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 
 
-class PolyhedronView : public MyOpenGLWidget
+class PolyhedronView : public QOpenGLWidget, protected QOpenGLFunctions
 {
 public:
     PolyhedronView(QWidget *parent);

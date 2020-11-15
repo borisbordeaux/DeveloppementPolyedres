@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "myopenglwidget.h"
+#include "netview.h"
+#include "polyhedronview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,7 +19,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    MyOpenGLWidget *m_polyedronView;
-    MyOpenGLWidget *m_netView;
+    PolyhedronView *m_polyedronView;
+    NetView *m_netView;
 };
 #endif // MAINWINDOW_H

@@ -1,9 +1,10 @@
 #ifndef NETVIEW_H
 #define NETVIEW_H
 
-#include "myopenglwidget.h"
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 
-class NetView : public MyOpenGLWidget
+class NetView : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 

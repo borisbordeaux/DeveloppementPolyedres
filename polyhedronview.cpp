@@ -1,8 +1,9 @@
 #include "polyhedronview.h"
 #include <QDebug>
+#include <QMouseEvent>
 
 PolyhedronView::PolyhedronView(QWidget *parent):
-    MyOpenGLWidget(parent)
+    QOpenGLWidget(parent)
 {
 
 }

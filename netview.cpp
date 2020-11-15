@@ -1,7 +1,7 @@
 #include "netview.h"
 
 NetView::NetView(QWidget *parent):
-    MyOpenGLWidget(parent)
+    QOpenGLWidget(parent)
 {
 
 }
