@@ -21,11 +21,13 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     netview.cpp \
+    polyhedron.cpp \
     polyhedronview.cpp
 
 HEADERS += \
     mainwindow.h \
     netview.h \
+    polyhedron.h \
     polyhedronview.h
 
 FORMS += \

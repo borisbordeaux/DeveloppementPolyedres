@@ -7,6 +7,7 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
+#include "polyhedron.h"
 
 
 class PolyhedronView : public QOpenGLWidget, protected QOpenGLFunctions
@@ -39,10 +40,14 @@ private:
     QOpenGLShaderProgram *m_program = nullptr;
     int m_projMatrixLoc = 0;
     int m_mvMatrixLoc = 0;
+    int m_normalMatrixLoc = 0;
+    int m_camMatrixLoc = 0;
     int m_lightPosLoc = 0;
     QMatrix4x4 m_proj;
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
+
+    Polyhedron m_polyhedron;
 };
 
 #endif // POLYHEDRONVIEW_H
