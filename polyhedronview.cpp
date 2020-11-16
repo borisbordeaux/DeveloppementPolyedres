@@ -1,5 +1,4 @@
 #include "polyhedronview.h"
-#include <QDebug>
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <iostream>
@@ -7,7 +6,6 @@
 PolyhedronView::PolyhedronView(QWidget *parent):
     QOpenGLWidget(parent)
 {
-
 }
 
 PolyhedronView::~PolyhedronView()
@@ -25,9 +23,9 @@ PolyhedronView::~PolyhedronView()
 static void qNormalizeAngle(int &angle)
 {
     while(angle < 0)
-        angle += 360 * 16;
-    while(angle > 360 * 16)
-        angle -= 360 * 16;
+        angle += 360 * 2;
+    while(angle > 360 * 2)
+        angle -= 360 * 2;
 }
 
 void PolyhedronView::setXRotation(int angle)
@@ -46,6 +44,16 @@ void PolyhedronView::setYRotation(int angle)
     if(angle != m_yRot)
     {
         m_yRot = angle;
+        update();
+    }
+}
+
+void PolyhedronView::setZRotation(int angle)
+{
+    qNormalizeAngle(angle);
+    if(angle != m_zRot)
+    {
+        m_zRot = angle;
         update();
     }
 }
@@ -81,7 +89,7 @@ void PolyhedronView::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    std::cout << glGetString(GL_VERSION) << std::endl;
+    std::cout << "Polyhedron View : " << glGetString(GL_VERSION) << std::endl;
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -127,11 +135,12 @@ void PolyhedronView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 
     m_world.setToIdentity();
-    m_world.rotate(m_xRot / 16.0f, 1, 0, 0);
-    m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_world.rotate(m_xRot / 2.0f, 1, 0, 0);
+    m_world.rotate(m_yRot / 2.0f, 0, 1, 0);
+    m_world.rotate(m_zRot / 2.0f, 0, 0, 1);
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
@@ -139,7 +148,6 @@ void PolyhedronView::paintGL()
     m_program->setUniformValue(m_mvMatrixLoc, m_world);
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
-
     glDrawArrays(GL_TRIANGLES, 0, m_polyhedron.vertexCount());
 
     m_program->release();
@@ -165,8 +173,13 @@ void PolyhedronView::mouseMoveEvent(QMouseEvent *event)
 
     if(event->buttons() & Qt::LeftButton)
     {
-        setXRotation(m_xRot + 8 * dy);
-        setYRotation(m_yRot + 8 * dx);
+        setXRotation(m_xRot + dy);
+        setYRotation(m_yRot + dx);
+    }
+    if(event->buttons() & Qt::RightButton)
+    {
+        setZRotation(m_zRot + 1 * dx);
+        setYRotation(m_yRot + 1 * dy);
     }
     m_lastPos = event->pos();
 }

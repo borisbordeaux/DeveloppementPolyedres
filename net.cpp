@@ -1,6 +1,6 @@
-#include "polyhedron.h"
+#include "net.h"
 
-Polyhedron::Polyhedron()
+Net::Net()
 {
     int nbTriangle = 12;
     int nbOfAdd = 3 * nbTriangle;
@@ -56,7 +56,7 @@ Polyhedron::Polyhedron()
     triangle(x7,y7,z7,x6,y6,z6,x5,y5,z5);
 }
 
-void Polyhedron::add(const QVector3D &v, const QVector3D &n)
+void Net::add(const QVector3D &v, const QVector3D &n)
 {
     GLfloat *p = m_data.data() + m_count;
     *p++ = v.x();
@@ -68,7 +68,7 @@ void Polyhedron::add(const QVector3D &v, const QVector3D &n)
     m_count += 6;
 }
 
-void Polyhedron::triangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2, GLfloat x3, GLfloat y3, GLfloat z3)
+void Net::triangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2, GLfloat x3, GLfloat y3, GLfloat z3)
 {
     QVector3D n = QVector3D::normal(QVector3D(x2 - x1, y2 - y1, z2 - z1), QVector3D(x3 - x2, y3 - y2, z3 - z2));
 

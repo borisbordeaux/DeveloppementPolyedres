@@ -18,9 +18,10 @@ public:
 
     void setXRotation(int angle);
     void setYRotation(int angle);
+    void setZRotation(int angle);
 
-    // QOpenGLWidget interface
 protected:
+    // QOpenGLWidget interface
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int w, int h) override;

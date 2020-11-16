@@ -14,8 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->verticalLayout->addWidget(m_polyedronView);
     ui->verticalLayout->addWidget(m_netView);
-
-    m_polyedronView->grabKeyboard();
 }
 
 MainWindow::~MainWindow()

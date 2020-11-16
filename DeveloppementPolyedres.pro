@@ -20,12 +20,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    net.cpp \
     netview.cpp \
     polyhedron.cpp \
     polyhedronview.cpp
 
 HEADERS += \
     mainwindow.h \
+    net.h \
     netview.h \
     polyhedron.h \
     polyhedronview.h

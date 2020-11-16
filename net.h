@@ -1,14 +1,15 @@
-#ifndef POLYHEDRON_H
-#define POLYHEDRON_H
+#ifndef NET_H
+#define NET_H
 
 #include <qopengl.h>
 #include <QVector>
 #include <QVector3D>
 
-class Polyhedron
+class Net
 {
 public:
-    Polyhedron();
+    Net();
+
     const GLfloat *constData() const { return m_data.constData(); }
     int count() const { return m_count; }
     int vertexCount() const { return m_count / 6; };
@@ -22,4 +23,4 @@ private:
     int m_count = 0;
 };
 
-#endif // POLYHEDRON_H
+#endif // NET_H
