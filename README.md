@@ -1,9 +1,10 @@
 # DeveloppementPolyedres
 
 Projet tuteuré ayant pour but de visualiser le patron d'un
-polyèdre chargé au préalable par l'utilisateur
+polyèdre chargé au préalable par l'utilisateur.
 
 ## A faire
+
 ### Chargement d'un polyèdre
     -lire un fichier .OBJ
     -construire la structure en demi-arrête
@@ -22,10 +23,11 @@ polyèdre chargé au préalable par l'utilisateur
     -Exporter une image du patron entièrement déplié
 
 ## Fonctionnalités
+
 ### Manipulation du polyèdre et de son patron
     -A l'aide de la souris pour tourner le polyèdre
     -A l'aide d'un slider pour plus ou moins déplier
      le patron
  
- ### Animation
+### Animation
     -Possibilité d'animer le depliement du patron
