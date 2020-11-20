@@ -1,6 +1,7 @@
 #include "net.h"
 
-Net::Net()
+Net::Net():
+    Model()
 {
     int nbTriangle = 12;
     int nbOfAdd = 3 * nbTriangle;

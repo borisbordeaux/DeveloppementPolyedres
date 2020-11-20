@@ -18,19 +18,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #LIBS += -lopengl32 -lglu32
 
 SOURCES += \
+    glview.cpp \
     main.cpp \
     mainwindow.cpp \
+    model.cpp \
     net.cpp \
-    netview.cpp \
-    polyhedron.cpp \
-    polyhedronview.cpp
+    polyhedron.cpp
 
 HEADERS += \
+    glview.h \
     mainwindow.h \
+    model.h \
     net.h \
-    netview.h \
-    polyhedron.h \
-    polyhedronview.h
+    polyhedron.h
 
 FORMS += \
     mainwindow.ui

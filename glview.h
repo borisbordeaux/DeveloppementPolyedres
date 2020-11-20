@@ -1,5 +1,5 @@
-#ifndef NETVIEW_H
-#define NETVIEW_H
+#ifndef GLVIEW_H
+#define GLVIEW_H
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -7,15 +7,13 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
-#include "net.h"
+#include "model.h"
 
-class NetView : public QOpenGLWidget, protected QOpenGLFunctions
+class GLView : public QOpenGLWidget, protected QOpenGLFunctions
 {
-    Q_OBJECT
-
 public:
-    NetView(QWidget *parent);
-    ~NetView();
+    GLView(Model &model, QWidget *parent = 0);
+    ~GLView();
 
     void setXRotation(int angle);
     void setYRotation(int angle);
@@ -30,6 +28,7 @@ protected:
     // QWidget interface
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     int m_xRot = 0;
@@ -49,7 +48,7 @@ private:
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
 
-    Net m_net;
+    Model m_model;
 };
 
-#endif // NETVIEW_H
+#endif // GLVIEW_H

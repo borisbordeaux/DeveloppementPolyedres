@@ -1,6 +1,7 @@
 #include "polyhedron.h"
 
-Polyhedron::Polyhedron()
+Polyhedron::Polyhedron():
+    Model()
 {
     int nbTriangle = 12;
     int nbOfAdd = 3 * nbTriangle;

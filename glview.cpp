@@ -1,14 +1,15 @@
-#include "polyhedronview.h"
+#include "glview.h"
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QWheelEvent>
 #include <iostream>
 
-PolyhedronView::PolyhedronView(QWidget *parent):
-    QOpenGLWidget(parent)
+GLView::GLView(Model &model, QWidget *parent):
+    QOpenGLWidget(parent), m_model(model)
 {
 }
 
-PolyhedronView::~PolyhedronView()
+GLView::~GLView()
 {
     if(m_program != nullptr)
     {
@@ -28,7 +29,7 @@ static void qNormalizeAngle(int &angle)
         angle -= 360 * 2;
 }
 
-void PolyhedronView::setXRotation(int angle)
+void GLView::setXRotation(int angle)
 {
     qNormalizeAngle(angle);
     if(angle != m_xRot)
@@ -38,7 +39,7 @@ void PolyhedronView::setXRotation(int angle)
     }
 }
 
-void PolyhedronView::setYRotation(int angle)
+void GLView::setYRotation(int angle)
 {
     qNormalizeAngle(angle);
     if(angle != m_yRot)
@@ -48,7 +49,7 @@ void PolyhedronView::setYRotation(int angle)
     }
 }
 
-void PolyhedronView::setZRotation(int angle)
+void GLView::setZRotation(int angle)
 {
     qNormalizeAngle(angle);
     if(angle != m_zRot)
@@ -59,10 +60,11 @@ void PolyhedronView::setZRotation(int angle)
 }
 
 static const char *vertexShaderSource =
-        "attribute vec4 vertex;\n"
-        "attribute vec3 normal;\n"
-        "varying vec3 vert;\n"
-        "varying vec3 vertNormal;\n"
+        "#version 150 core\n"
+        "in vec4 vertex;\n"
+        "in vec3 normal;\n"
+        "out vec3 vert;\n"
+        "out vec3 vertNormal;\n"
         "uniform mat4 projMatrix;\n"
         "uniform mat4 mvMatrix;\n"
         "uniform mat3 normalMatrix;\n"
@@ -74,22 +76,25 @@ static const char *vertexShaderSource =
         "}\n";
 
 static const char *fragmentShaderSource =
-        "varying highp vec3 vert;\n"
-        "varying highp vec3 vertNormal;\n"
-        "uniform vec3 lightPos;\n"
+        "#version 150 core\n"
+        "in highp vec3 vert;\n"
+        "in highp vec3 vertNormal;\n"
+        "out highp vec4 fragColor;\n"
+        "uniform highp vec3 lightPos;\n"
         "void main() {\n"
         "   highp vec3 L = normalize(lightPos - vert);\n"
-        "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+        "   highp float NL = abs(dot(normalize(vertNormal), L));\n"
         "   highp vec3 color = vec3(0.39, 1.0, 0.0);\n"
         "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
-        "   gl_FragColor = vec4(col, 1.0);\n"
+        "   fragColor = vec4(col, 1.0);\n"
         "}\n";
 
-void PolyhedronView::initializeGL()
+void GLView::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    std::cout << "Polyhedron View : " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "OpenGL version : " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "GLSL version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -113,9 +118,8 @@ void PolyhedronView::initializeGL()
 
     m_vbo.create();
     m_vbo.bind();
-    m_vbo.allocate(m_polyhedron.constData(), m_polyhedron.count() * sizeof(GLfloat));
+    m_vbo.allocate(m_model.constData(), m_model.count() * sizeof(GLfloat));
 
-    m_vbo.bind();
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), nullptr);
@@ -131,7 +135,7 @@ void PolyhedronView::initializeGL()
     m_program->release();
 }
 
-void PolyhedronView::paintGL()
+void GLView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -146,27 +150,28 @@ void PolyhedronView::paintGL()
     m_program->bind();
     m_program->setUniformValue(m_projMatrixLoc, m_proj);
     m_program->setUniformValue(m_mvMatrixLoc, m_world);
+    m_program->setUniformValue(m_camMatrixLoc, m_camera);
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
-    glDrawArrays(GL_TRIANGLES, 0, m_polyhedron.vertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, m_model.vertexCount());
 
     m_program->release();
 }
 
 
-void PolyhedronView::resizeGL(int w, int h)
+void GLView::resizeGL(int w, int h)
 {
     m_proj.setToIdentity();
     m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
 }
 
 
-void PolyhedronView::mousePressEvent(QMouseEvent *event)
+void GLView::mousePressEvent(QMouseEvent *event)
 {
     m_lastPos = event->pos();
 }
 
-void PolyhedronView::mouseMoveEvent(QMouseEvent *event)
+void GLView::mouseMoveEvent(QMouseEvent *event)
 {
     int dx = event->x() - m_lastPos.x();
     int dy = event->y() - m_lastPos.y();
@@ -182,4 +187,10 @@ void PolyhedronView::mouseMoveEvent(QMouseEvent *event)
         setYRotation(m_yRot + 1 * dy);
     }
     m_lastPos = event->pos();
+}
+
+void GLView::wheelEvent(QWheelEvent *event)
+{
+    m_camera.translate(0.0f,0.0f,(float)event->angleDelta().y()/500.0f);
+    update();
 }

@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "polyhedronview.h"
-#include "netview.h"
+#include "glview.h"
+#include "net.h"
+#include "polyhedron.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,8 +10,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_polyedronView = new PolyhedronView(parent);
-    m_netView = new NetView(parent);
+    Polyhedron polyhedron;
+    Net net;
+
+    m_polyedronView = new GLView(polyhedron, parent);
+    m_netView = new GLView(net, parent);
 
     ui->verticalLayout->addWidget(m_polyedronView);
     ui->verticalLayout->addWidget(m_netView);
