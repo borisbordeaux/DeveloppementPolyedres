@@ -3,10 +3,15 @@
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <iostream>
+#include <QGuiApplication>
+#include <QScreen>
 
 GLView::GLView(Model &model, QWidget *parent):
-    QOpenGLWidget(parent), m_model(model)
+    QOpenGLWidget(parent), m_model(model), m_timer(this)
 {
+    int interval = 1000/QGuiApplication::primaryScreen()->refreshRate();
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(screenUpdate()));
+    m_timer.start(interval);
 }
 
 GLView::~GLView()
@@ -35,7 +40,7 @@ void GLView::setXRotation(int angle)
     if(angle != m_xRot)
     {
         m_xRot = angle;
-        update();
+        m_matrixChanged = true;
     }
 }
 
@@ -45,7 +50,7 @@ void GLView::setYRotation(int angle)
     if(angle != m_yRot)
     {
         m_yRot = angle;
-        update();
+        m_matrixChanged = true;
     }
 }
 
@@ -55,8 +60,13 @@ void GLView::setZRotation(int angle)
     if(angle != m_zRot)
     {
         m_zRot = angle;
-        update();
+        m_matrixChanged = true;
     }
+}
+
+void GLView::screenUpdate()
+{
+    update();
 }
 
 static const char *vertexShaderSource =
@@ -68,11 +78,10 @@ static const char *vertexShaderSource =
         "uniform mat4 projMatrix;\n"
         "uniform mat4 mvMatrix;\n"
         "uniform mat3 normalMatrix;\n"
-        "uniform mat4 camMatrix;\n"
         "void main() {\n"
         "   vert = vertex.xyz;\n"
         "   vertNormal = normalMatrix * normal;\n"
-        "   gl_Position = projMatrix * camMatrix * mvMatrix * vertex;\n"
+        "   gl_Position = projMatrix * mvMatrix * vertex;\n"
         "}\n";
 
 static const char *fragmentShaderSource =
@@ -84,8 +93,8 @@ static const char *fragmentShaderSource =
         "void main() {\n"
         "   highp vec3 L = normalize(lightPos - vert);\n"
         "   highp float NL = abs(dot(normalize(vertNormal), L));\n"
-        "   highp vec3 color = vec3(0.39, 1.0, 0.0);\n"
-        "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+        "   highp vec3 color = vec3(0.8, 0.8, 1.0);\n"
+        "   highp vec3 col = clamp(color * 0.1 + color * 0.9 * NL, 0.0, 1.0);\n"
         "   fragColor = vec4(col, 1.0);\n"
         "}\n";
 
@@ -109,7 +118,6 @@ void GLView::initializeGL()
     m_projMatrixLoc = m_program->uniformLocation("projMatrix");
     m_mvMatrixLoc = m_program->uniformLocation("mvMatrix");
     m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
-    m_camMatrixLoc = m_program->uniformLocation("camMatrix");
     m_lightPosLoc = m_program->uniformLocation("lightPos");
 
     //for compatibility
@@ -118,7 +126,7 @@ void GLView::initializeGL()
 
     m_vbo.create();
     m_vbo.bind();
-    m_vbo.allocate(m_model.constData(), m_model.count() * sizeof(GLfloat));
+    m_vbo.allocate(nullptr, m_model.count() * sizeof(GLfloat));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -127,8 +135,7 @@ void GLView::initializeGL()
     m_vbo.release();
 
     m_camera.setToIdentity();
-    m_camera.translate(0.0f,0.0f,-3.0f);
-    m_program->setUniformValue(m_camMatrixLoc, m_camera);
+    m_camera.lookAt(QVector3D(0.0f,0.0f,3.0f), QVector3D(0.0f,0.0f,0.0f), QVector3D(0.0f,1.0f,0.0f));
 
     m_program->setUniformValue(m_lightPosLoc, QVector3D(0.0f, 0.0f, 50.0f));
 
@@ -141,18 +148,31 @@ void GLView::paintGL()
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
 
-    m_world.setToIdentity();
-    m_world.rotate(m_xRot / 2.0f, 1, 0, 0);
-    m_world.rotate(m_yRot / 2.0f, 0, 1, 0);
-    m_world.rotate(m_zRot / 2.0f, 0, 0, 1);
-
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
-    m_program->setUniformValue(m_projMatrixLoc, m_proj);
-    m_program->setUniformValue(m_mvMatrixLoc, m_world);
-    m_program->setUniformValue(m_camMatrixLoc, m_camera);
-    QMatrix3x3 normalMatrix = m_world.normalMatrix();
-    m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+
+
+    if (m_modelChanged)
+    {
+        m_modelChanged = false;
+        m_vbo.bind();
+        m_vbo.write(0, m_model.constData(), m_model.count() * sizeof(GLfloat));
+        m_vbo.release();
+    }
+
+    if(m_matrixChanged)
+    {
+        m_matrixChanged = false;
+        m_world.setToIdentity();
+        m_world.rotate(m_xRot / 2.0f, 1, 0, 0);
+        m_world.rotate(m_yRot / 2.0f, 0, 1, 0);
+        m_world.rotate(m_zRot / 2.0f, 0, 0, 1);
+
+        m_program->setUniformValue(m_projMatrixLoc, m_proj);
+        m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
+        QMatrix3x3 normalMatrix = m_world.normalMatrix();
+        m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+    }
     glDrawArrays(GL_TRIANGLES, 0, m_model.vertexCount());
 
     m_program->release();
@@ -163,6 +183,7 @@ void GLView::resizeGL(int w, int h)
 {
     m_proj.setToIdentity();
     m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
+    m_matrixChanged = true;
 }
 
 
@@ -183,8 +204,8 @@ void GLView::mouseMoveEvent(QMouseEvent *event)
     }
     if(event->buttons() & Qt::RightButton)
     {
-        setZRotation(m_zRot + 1 * dx);
-        setYRotation(m_yRot + 1 * dy);
+        setZRotation(m_zRot - dx);
+        setYRotation(m_yRot + dy);
     }
     m_lastPos = event->pos();
 }
@@ -192,5 +213,5 @@ void GLView::mouseMoveEvent(QMouseEvent *event)
 void GLView::wheelEvent(QWheelEvent *event)
 {
     m_camera.translate(0.0f,0.0f,(float)event->angleDelta().y()/500.0f);
-    update();
+    m_matrixChanged = true;
 }

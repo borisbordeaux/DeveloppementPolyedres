@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include "glview.h"
 
+#include "net.h"
+#include "polyhedron.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -18,7 +21,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    GLView *m_polyedronView;
-    GLView *m_netView;
+    Polyhedron m_polyhedron;
+    Net m_net;
+    GLView m_polyedronView;
+    GLView m_netView;
 };
 #endif // MAINWINDOW_H
