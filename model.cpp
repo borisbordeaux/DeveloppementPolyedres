@@ -1,6 +1,12 @@
 #include "model.h"
 
-Model::Model()
+Model::Model(Mesh *mesh):
+    m_mesh(mesh)
 {
 
+}
+
+void Model::setMesh(Mesh *mesh)
+{
+    m_mesh = mesh;
 }

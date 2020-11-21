@@ -18,19 +18,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #LIBS += -lopengl32 -lglu32
 
 SOURCES += \
+    face.cpp \
     glview.cpp \
+    halfedge.cpp \
     main.cpp \
     mainwindow.cpp \
+    mesh.cpp \
     model.cpp \
     net.cpp \
-    polyhedron.cpp
+    polyhedron.cpp \
+    vertex.cpp
 
 HEADERS += \
+    face.h \
     glview.h \
+    halfedge.h \
     mainwindow.h \
+    mesh.h \
     model.h \
     net.h \
-    polyhedron.h
+    polyhedron.h \
+    vertex.h
 
 FORMS += \
     mainwindow.ui

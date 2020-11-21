@@ -1,7 +1,7 @@
 #include "net.h"
 
-Net::Net():
-    Model()
+Net::Net(Mesh *mesh):
+    Model(mesh)
 {
     int nbTriangle = 12;
     int nbOfAdd = 3 * nbTriangle;
