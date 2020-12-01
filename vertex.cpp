@@ -1,7 +1,7 @@
 #include "vertex.h"
 
-Vertex::Vertex(float x, float y, float z):
-    m_x(x), m_y(y), m_z(z)
+Vertex::Vertex(float x, float y, float z, QString name):
+    m_x(x), m_y(y), m_z(z), m_name(name)
 {
 
 }
@@ -44,4 +44,14 @@ HalfEdge *Vertex::halfEdge() const
 void Vertex::setHalfEdge(HalfEdge *halfEdge)
 {
     m_halfEdge = halfEdge;
+}
+
+QString Vertex::name() const
+{
+    return m_name;
+}
+
+void Vertex::setName(const QString &name)
+{
+    m_name = name;
 }

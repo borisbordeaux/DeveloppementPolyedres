@@ -1,6 +1,7 @@
 #ifndef HALFEDGE_H
 #define HALFEDGE_H
 
+#include <QString>
 #include "vertex.h"
 #include "face.h"
 
@@ -14,7 +15,7 @@ public:
      * @brief Construct a halfedge with its origin
      * @param origin the orgin of the halfedge
      */
-    HalfEdge(Vertex *origin);
+    HalfEdge(Vertex *origin, QString name = "");
     ~HalfEdge();
 
     /**
@@ -77,12 +78,26 @@ public:
      */
     void setNext(HalfEdge *next);
 
+    /**
+     * @brief getter
+     * @return the name of this halfedge, represented by the vertices
+     * it bind, in the order origine -> next.origin
+     */
+    QString name() const;
+
+    /**
+     * @brief setter
+     * @param name the name to be set for this halfedge
+     */
+    void setName(const QString &name);
+
 private:
     Vertex *m_origin;
     Face *m_face;
     HalfEdge *m_twin;
     HalfEdge *m_prev;
     HalfEdge *m_next;
+    QString m_name;
 };
 
 #endif // HALFEDGE_H

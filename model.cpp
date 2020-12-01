@@ -5,8 +5,3 @@ Model::Model(Mesh *mesh):
 {
 
 }
-
-void Model::setMesh(Mesh *mesh)
-{
-    m_mesh = mesh;
-}

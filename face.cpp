@@ -1,7 +1,7 @@
 #include "face.h"
 
-Face::Face(HalfEdge *halfEdge) :
-    m_halfEdge(halfEdge)
+Face::Face(QString name, HalfEdge *halfEdge):
+    m_name(name), m_halfEdge(halfEdge)
 {
 
 }
@@ -19,4 +19,14 @@ HalfEdge *Face::halfEdge() const
 void Face::setHalfEdge(HalfEdge *halfEdge)
 {
     m_halfEdge = halfEdge;
+}
+
+QString Face::name() const
+{
+    return m_name;
+}
+
+void Face::setName(const QString &name)
+{
+    m_name = name;
 }

@@ -57,6 +57,10 @@ Net::Net(Mesh *mesh):
     triangle(x7,y7,z7,x6,y6,z6,x5,y5,z5);
 }
 
+void Net::updateDataWithMesh()
+{
+}
+
 void Net::add(const QVector3D &v, const QVector3D &n)
 {
     GLfloat *p = m_data.data() + m_count;

@@ -33,10 +33,13 @@ public:
     int vertexCount() const { return m_count / 6; };
 
     /**
-     * @brief setter
-     * @param mesh the mesh to set to this model
+     * @brief updateDataWithMesh update the constData
+     * of this model based on its mesh. It is necessary
+     * when the mesh changed
+     * TODO: set it as a slot in order to open any mesh
+     * and synchronize the views
      */
-    void setMesh(Mesh *mesh);
+    virtual void updateDataWithMesh() = 0;
 
 protected:
     //the data of this model

@@ -1,7 +1,9 @@
 #include "halfedge.h"
 
-HalfEdge::HalfEdge(Vertex *origin):
-    m_origin(origin)
+HalfEdge::HalfEdge(Vertex *origin, QString name):
+    m_origin(origin), m_face(nullptr),
+    m_twin(nullptr), m_prev(nullptr),
+    m_next(nullptr), m_name(name)
 {
 
 }
@@ -63,4 +65,14 @@ HalfEdge *HalfEdge::next() const
 void HalfEdge::setNext(HalfEdge *next)
 {
     m_next = next;
+}
+
+QString HalfEdge::name() const
+{
+    return m_name;
+}
+
+void HalfEdge::setName(const QString &name)
+{
+    m_name = name;
 }

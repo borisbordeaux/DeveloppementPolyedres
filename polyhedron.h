@@ -14,6 +14,9 @@ public:
      */
     Polyhedron(Mesh *mesh);
 
+    // Model interface
+    void updateDataWithMesh() override;
+
 private:
     /**
      * @brief add a vertex and its normal to the data

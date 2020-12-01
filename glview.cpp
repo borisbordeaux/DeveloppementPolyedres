@@ -6,7 +6,7 @@
 #include <QGuiApplication>
 #include <QScreen>
 
-GLView::GLView(Model &model, QWidget *parent):
+GLView::GLView(Model *model, QWidget *parent):
     QOpenGLWidget(parent), m_model(model), m_timer(this)
 {
     int interval = 1000/QGuiApplication::primaryScreen()->refreshRate();
@@ -62,6 +62,20 @@ void GLView::setZRotation(int angle)
         m_zRot = angle;
         m_matrixChanged = true;
     }
+}
+
+void GLView::meshChanged()
+{
+    m_vbo.bind();
+    m_vbo.allocate(nullptr, m_model->count() * sizeof(GLfloat));
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    m_vbo.release();
+
+    m_modelChanged = true;
 }
 
 void GLView::screenUpdate()
@@ -125,14 +139,7 @@ void GLView::initializeGL()
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 
     m_vbo.create();
-    m_vbo.bind();
-    m_vbo.allocate(nullptr, m_model.count() * sizeof(GLfloat));
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
-    m_vbo.release();
+    meshChanged();
 
     m_camera.setToIdentity();
     m_camera.lookAt(QVector3D(0.0f,0.0f,3.0f), QVector3D(0.0f,0.0f,0.0f), QVector3D(0.0f,1.0f,0.0f));
@@ -156,7 +163,7 @@ void GLView::paintGL()
     {
         m_modelChanged = false;
         m_vbo.bind();
-        m_vbo.write(0, m_model.constData(), m_model.count() * sizeof(GLfloat));
+        m_vbo.write(0, m_model->constData(), m_model->count() * sizeof(GLfloat));
         m_vbo.release();
     }
 
@@ -173,7 +180,7 @@ void GLView::paintGL()
         QMatrix3x3 normalMatrix = m_world.normalMatrix();
         m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
     }
-    glDrawArrays(GL_TRIANGLES, 0, m_model.vertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
 
     m_program->release();
 }

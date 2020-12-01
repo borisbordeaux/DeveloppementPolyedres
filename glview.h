@@ -20,7 +20,7 @@ public:
      * @param model the model that has to be drawn
      * @param parent the parent of this widget
      */
-    GLView(Model &model, QWidget *parent = 0);
+    GLView(Model *model, QWidget *parent = 0);
     ~GLView();
 
     /**
@@ -56,6 +56,9 @@ public:
      * @brief Stop the timer for animation
      */
     void stopTimer();
+
+public slots:
+    void meshChanged();
 
 private slots:
     /**
@@ -107,7 +110,7 @@ private:
     QMatrix4x4 m_world;
 
     //the model that will be displayed
-    Model m_model;
+    Model *m_model;
 
     //the timer for animation
     QTimer m_timer;

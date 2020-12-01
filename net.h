@@ -13,6 +13,9 @@ public:
      */
     Net(Mesh *mesh);
 
+    // Model interface
+    void updateDataWithMesh() override;
+
 private:
 
     /**

@@ -39,5 +39,9 @@ private:
     //OpenGL Widgets that will draw the meshes
     GLView m_polyedronView;
     GLView m_netView;
+
+    // QWidget interface
+protected:
+    void keyReleaseEvent(QKeyEvent *event) override;
 };
 #endif // MAINWINDOW_H

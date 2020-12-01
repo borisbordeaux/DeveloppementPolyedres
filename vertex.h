@@ -14,7 +14,7 @@ public:
      * @param y the y value of the vertex
      * @param z the z value of the vertex
      */
-    Vertex(float x, float y, float z);
+    Vertex(float x, float y, float z, QString name = "");
 
     /**
      * @brief getter
@@ -64,11 +64,25 @@ public:
      */
     void setHalfEdge(HalfEdge *halfEdge);
 
+    /**
+     * @brief getter
+     * @return the name of this vertex
+     */
+    QString name() const;
+
+    /**
+     * @brief setter
+     * @param name the name to set to this vertex
+     */
+    void setName(const QString &name);
+
 private:
     //coordinates of this vertex
     float m_x, m_y, m_z;
     //a halfedge from which this point is its origin
     HalfEdge *m_halfEdge;
+    //name of the vertex
+    QString m_name;
 };
 
 #endif // VERTEX_H

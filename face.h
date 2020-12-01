@@ -12,7 +12,7 @@ public:
      * @brief Construct a Face with one halfedge
      * @param halfEdge the halfedge the face will use
      */
-    Face(HalfEdge *halfEdge);
+    Face(QString name = "", HalfEdge *halfEdge = nullptr);
     ~Face();
 
     /**
@@ -27,7 +27,20 @@ public:
      */
     void setHalfEdge(HalfEdge *halfEdge);
 
+    /**
+     * @brief getter
+     * @return the name of this face
+     */
+    QString name() const;
+
+    /**
+     * @brief setter
+     * @param name the name to set to this face
+     */
+    void setName(const QString &name);
+
 private:
+    QString m_name;
     HalfEdge *m_halfEdge;
 };
 
