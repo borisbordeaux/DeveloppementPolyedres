@@ -4,10 +4,6 @@
 #include <QMainWindow>
 #include "glview.h"
 
-#include "net.h"
-#include "polyhedron.h"
-#include "mesh.h"
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -24,6 +20,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    // QWidget interface
+protected:
+    void keyReleaseEvent(QKeyEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
 
@@ -33,15 +33,11 @@ private:
 
     //the polyhedron and its net that read the
     //meshes and throw the data to the view
-    Polyhedron m_polyhedron;
-    Net m_net;
+    Model m_polyhedron;
+    Model m_net;
 
     //OpenGL Widgets that will draw the meshes
     GLView m_polyedronView;
     GLView m_netView;
-
-    // QWidget interface
-protected:
-    void keyReleaseEvent(QKeyEvent *event) override;
 };
 #endif // MAINWINDOW_H

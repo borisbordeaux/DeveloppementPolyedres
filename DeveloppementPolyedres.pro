@@ -25,9 +25,7 @@ SOURCES += \
     mainwindow.cpp \
     mesh.cpp \
     model.cpp \
-    net.cpp \
     objreader.cpp \
-    polyhedron.cpp \
     vertex.cpp
 
 HEADERS += \
@@ -37,9 +35,7 @@ HEADERS += \
     mainwindow.h \
     mesh.h \
     model.h \
-    net.h \
     objreader.h \
-    polyhedron.h \
     vertex.h
 
 FORMS += \

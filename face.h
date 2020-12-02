@@ -13,7 +13,6 @@ public:
      * @param halfEdge the halfedge the face will use
      */
     Face(QString name = "", HalfEdge *halfEdge = nullptr);
-    ~Face();
 
     /**
      * @brief getter

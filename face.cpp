@@ -1,14 +1,10 @@
 #include "face.h"
+#include <QDebug>
 
 Face::Face(QString name, HalfEdge *halfEdge):
     m_name(name), m_halfEdge(halfEdge)
 {
 
-}
-
-Face::~Face()
-{
-    delete m_halfEdge;
 }
 
 HalfEdge *Face::halfEdge() const

@@ -16,7 +16,6 @@ public:
      * @param origin the orgin of the halfedge
      */
     HalfEdge(Vertex *origin, QString name = "");
-    ~HalfEdge();
 
     /**
      * @brief getter

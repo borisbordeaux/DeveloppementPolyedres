@@ -15,6 +15,9 @@ int main(int argc, char *argv[])
     fmt.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(fmt);
 
+    int *in = nullptr;
+    delete in;
+
     MainWindow w;
     w.show();
     return a.exec();

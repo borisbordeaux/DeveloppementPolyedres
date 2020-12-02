@@ -12,7 +12,7 @@ public:
      * @param filename the full name of the OBJ file ot read
      * @return a pointer to a Mesh based on the OBJ file
      */
-    static Mesh *readOBJ(QString filename);
+    static void readOBJ(QString &filename, Mesh *mesh);
 };
 
 #endif // OBJREADER_H

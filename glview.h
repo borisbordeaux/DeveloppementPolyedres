@@ -47,16 +47,6 @@ public:
      */
     void setZRotation(int angle);
 
-    /**
-     * @brief Start the timer for animation
-     */
-    void startTimer();
-
-    /**
-     * @brief Stop the timer for animation
-     */
-    void stopTimer();
-
 public slots:
     void meshChanged();
 

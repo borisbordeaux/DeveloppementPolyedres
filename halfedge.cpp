@@ -8,15 +8,6 @@ HalfEdge::HalfEdge(Vertex *origin, QString name):
 
 }
 
-HalfEdge::~HalfEdge()
-{
-    delete m_origin;
-    delete m_face;
-    delete m_twin;
-    delete m_prev;
-    delete m_next;
-}
-
 Vertex *HalfEdge::origin() const
 {
     return m_origin;

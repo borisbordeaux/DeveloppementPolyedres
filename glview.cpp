@@ -116,6 +116,9 @@ void GLView::initializeGL()
 {
     initializeOpenGLFunctions();
 
+    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+
     std::cout << "OpenGL version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLSL version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
@@ -144,7 +147,7 @@ void GLView::initializeGL()
     m_camera.setToIdentity();
     m_camera.lookAt(QVector3D(0.0f,0.0f,3.0f), QVector3D(0.0f,0.0f,0.0f), QVector3D(0.0f,1.0f,0.0f));
 
-    m_program->setUniformValue(m_lightPosLoc, QVector3D(0.0f, 0.0f, 50.0f));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(0.0f, 0.0f, 100.0f));
 
     m_program->release();
 }
@@ -152,12 +155,9 @@ void GLView::initializeGL()
 void GLView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
-
 
     if (m_modelChanged)
     {

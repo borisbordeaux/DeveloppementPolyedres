@@ -18,18 +18,19 @@ public:
      * @brief Construct a mesh
      */
     Mesh();
+    ~Mesh();
 
     /**
      * @brief getter
      * @return the vector of the vertices of this mesh
      */
-    QVector<Vertex *> *vertices() const;
+    QVector<Vertex *> vertices() const;
 
     /**
      * @brief getter
      * @return the vector of the halfedges of this mesh
      */
-    QVector<HalfEdge *> *halfEdges() const;
+    QVector<HalfEdge *> halfEdges() const;
 
     /**
      * @brief append an halfedge to the list of halfedges
@@ -53,7 +54,7 @@ public:
      * @brief getter
      * @return the vector of the faces of this mesh
      */
-    QVector<Face *> *faces() const;
+    QVector<Face *> faces() const;
 
     /**
      * @brief cuts the mesh at the edge the halfedge is part of
@@ -73,9 +74,9 @@ public:
     HalfEdge *findByName(const QString &name);
 
 private:
-    QVector<Vertex*> *m_vertices;
-    QVector<HalfEdge*> *m_halfEdges;
-    QVector<Face*> *m_faces;
+    QVector<Vertex*> m_vertices;
+    QVector<HalfEdge*> m_halfEdges;
+    QVector<Face*> m_faces;
 
     //to enhance the finding of
     //one halfedge by its name
