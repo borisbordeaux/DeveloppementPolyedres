@@ -43,6 +43,16 @@ QVector<HalfEdge *> Mesh::halfEdges() const
     return m_halfEdges;
 }
 
+QVector<Face *> Mesh::faces() const
+{
+    return m_faces;
+}
+
+void Mesh::append(Vertex *v)
+{
+    m_vertices.append(v);
+}
+
 void Mesh::append(HalfEdge *he)
 {
     m_halfEdges.append(he);
@@ -54,14 +64,9 @@ void Mesh::append(Face *f)
     m_faces.append(f);
 }
 
-void Mesh::append(Vertex *v)
+Vertex *Mesh::get(int index)
 {
-    m_vertices.append(v);
-}
-
-QVector<Face *> Mesh::faces() const
-{
-    return m_faces;
+    return m_vertices.value(index);
 }
 
 bool Mesh::cut(HalfEdge *halfedge)
@@ -71,6 +76,14 @@ bool Mesh::cut(HalfEdge *halfedge)
     bool res = false;
     if (halfedge != nullptr && halfedge->twin() != nullptr)
     {
+        Vertex *v1 = new Vertex(halfedge->origin()->x(), halfedge->origin()->y(), halfedge->origin()->z());
+        Vertex *v2 = new Vertex(halfedge->next()->origin()->x(), halfedge->next()->origin()->y(), halfedge->next()->origin()->z());
+        m_vertices.append(v1);
+        m_vertices.append(v2);
+        halfedge->setOrigin(v1);
+        halfedge->next()->setOrigin(v2);
+        halfedge->twin()->setTwin(nullptr);
+        halfedge->setTwin(nullptr);
         res = true;
     }
     return res;

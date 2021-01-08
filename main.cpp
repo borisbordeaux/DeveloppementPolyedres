@@ -10,13 +10,10 @@ int main(int argc, char *argv[])
     //smoother display
     QSurfaceFormat fmt;
     fmt.setDepthBufferSize(24);
-    fmt.setSamples(16);
+    fmt.setSamples(4);
     fmt.setVersion(3,2);
     fmt.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(fmt);
-
-    int *in = nullptr;
-    delete in;
 
     MainWindow w;
     w.show();

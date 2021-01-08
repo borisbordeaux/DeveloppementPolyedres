@@ -25,6 +25,7 @@ SOURCES += \
     mainwindow.cpp \
     mesh.cpp \
     model.cpp \
+    netcontroler.cpp \
     objreader.cpp \
     vertex.cpp
 
@@ -35,6 +36,7 @@ HEADERS += \
     mainwindow.h \
     mesh.h \
     model.h \
+    netcontroler.h \
     objreader.h \
     vertex.h
 
@@ -45,3 +47,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resource.qrc

@@ -135,7 +135,7 @@ int Model::findNbOfTriangle() const
         nb += nbVertices-2;
     }
 
-    qDebug() << "nb of triangle" << nb;
+    //qDebug() << "nb of triangle" << nb;
 
     return nb;
 }

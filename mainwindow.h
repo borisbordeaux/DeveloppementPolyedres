@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "glview.h"
+#include "netcontroler.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +25,9 @@ public:
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
+private slots:
+    void on_sliderOpening_actionTriggered(int action);
+
 private:
     Ui::MainWindow *ui;
 
@@ -39,5 +43,7 @@ private:
     //OpenGL Widgets that will draw the meshes
     GLView m_polyedronView;
     GLView m_netView;
+
+    NetControler m_netControler;
 };
 #endif // MAINWINDOW_H

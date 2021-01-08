@@ -47,6 +47,8 @@ public:
      */
     void setZRotation(int angle);
 
+    void meshUpdated();
+
 public slots:
     void meshChanged();
 

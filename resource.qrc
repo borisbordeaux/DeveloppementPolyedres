@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/obj_files">
+        <file>obj_files/cube.obj</file>
+        <file>obj_files/diamond.obj</file>
+        <file>obj_files/truncated_dodecahedron.obj</file>
+        <file>obj_files/pyramid.obj</file>
+        <file>obj_files/octahedron.obj</file>
+        <file>obj_files/dodecahedron_triangulated.obj</file>
+        <file>obj_files/dodecahedron_face_pentagon.obj</file>
+    </qresource>
+</RCC>

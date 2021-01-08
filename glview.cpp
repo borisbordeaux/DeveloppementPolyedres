@@ -9,6 +9,7 @@
 GLView::GLView(Model *model, QWidget *parent):
     QOpenGLWidget(parent), m_model(model), m_timer(this)
 {
+    qDebug() << "Refresh Rate :" << QGuiApplication::primaryScreen()->refreshRate();
     int interval = 1000/QGuiApplication::primaryScreen()->refreshRate();
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(screenUpdate()));
     m_timer.start(interval);
@@ -64,6 +65,11 @@ void GLView::setZRotation(int angle)
     }
 }
 
+void GLView::meshUpdated()
+{
+    m_modelChanged = true;
+}
+
 void GLView::meshChanged()
 {
     m_vbo.bind();
@@ -75,7 +81,7 @@ void GLView::meshChanged()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
     m_vbo.release();
 
-    m_modelChanged = true;
+    meshUpdated();
 }
 
 void GLView::screenUpdate()
@@ -107,8 +113,8 @@ static const char *fragmentShaderSource =
         "void main() {\n"
         "   highp vec3 L = normalize(lightPos - vert);\n"
         "   highp float NL = abs(dot(normalize(vertNormal), L));\n"
-        "   highp vec3 color = vec3(0.8, 0.8, 1.0);\n"
-        "   highp vec3 col = clamp(color * 0.1 + color * 0.9 * NL, 0.0, 1.0);\n"
+        "   highp vec3 color = vec3(0.5, 0.5, 1.0);\n"
+        "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
         "   fragColor = vec4(col, 1.0);\n"
         "}\n";
 
@@ -119,8 +125,10 @@ void GLView::initializeGL()
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
 
-    std::cout << "OpenGL version : " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL version : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    QString val = QString::fromLatin1((char*)glGetString(GL_VERSION));
+    qDebug() << "OpenGL version : " << val;
+    val = QString::fromLatin1((char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    qDebug() << "GLSL version : " << val;
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

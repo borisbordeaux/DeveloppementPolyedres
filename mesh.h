@@ -33,6 +33,18 @@ public:
     QVector<HalfEdge *> halfEdges() const;
 
     /**
+     * @brief getter
+     * @return the vector of the faces of this mesh
+     */
+    QVector<Face *> faces() const;
+
+    /**
+     * @brief append a vertex to the list of vertices
+     * @param v the vertex to append
+     */
+    void append(Vertex *v);
+
+    /**
      * @brief append an halfedge to the list of halfedges
      * @param he the halfedge to append
      */
@@ -44,17 +56,7 @@ public:
      */
     void append(Face *f);
 
-    /**
-     * @brief append a vertex to the list of vertices
-     * @param v the vertex to append
-     */
-    void append(Vertex *v);
-
-    /**
-     * @brief getter
-     * @return the vector of the faces of this mesh
-     */
-    QVector<Face *> faces() const;
+    Vertex *get(int index);
 
     /**
      * @brief cuts the mesh at the edge the halfedge is part of

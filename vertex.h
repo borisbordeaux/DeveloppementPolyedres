@@ -76,6 +76,8 @@ public:
      */
     void setName(const QString &name);
 
+    bool equals(Vertex &other) const;
+
 private:
     //coordinates of this vertex
     float m_x, m_y, m_z;
