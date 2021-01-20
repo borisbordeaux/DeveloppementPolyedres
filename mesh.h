@@ -56,24 +56,14 @@ public:
      */
     void append(Face *f);
 
-    Vertex *get(int index);
-
-    /**
-     * @brief cuts the mesh at the edge the halfedge is part of
-     * and add a little face to the halfedge in parameters
-     * @param halfedge the halfedge the mesh will be cut at
-     * and the little face will be added on
-     * @return true if the cut was possible (the halfedge exists
-     * and its edge is between 2 faces)
-     */
-    bool cut(HalfEdge *halfedge);
-
     /**
      * @brief find one halfhedge that has the given name
      * @param name the name of the halfedge to find
      * @return a pointer to the halfedge found
      */
     HalfEdge *findByName(const QString &name);
+
+    void reset();
 
 private:
     QVector<Vertex*> m_vertices;

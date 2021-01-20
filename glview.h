@@ -103,9 +103,6 @@ private:
 
     //the model that will be displayed
     Model *m_model;
-
-    //the timer for animation
-    QTimer m_timer;
 };
 
 #endif // GLVIEW_H

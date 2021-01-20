@@ -46,25 +46,6 @@
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
-       <widget class="QPushButton" name="pbImportPolyedron">
-        <property name="minimumSize">
-         <size>
-          <width>112</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>112</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Import Polyedron</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QSlider" name="sliderOpening">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -74,7 +55,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
@@ -92,38 +73,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="maximumSize">
-         <size>
-          <width>112</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Animate</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton_2">
-        <property name="minimumSize">
-         <size>
-          <width>112</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>112</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Export Net</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -137,7 +86,73 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuOuvrir">
+     <property name="title">
+      <string>Open</string>
+     </property>
+     <addaction name="actionCube"/>
+     <addaction name="actionOctahedron"/>
+     <addaction name="actionDodecahedron"/>
+     <addaction name="actionPyramid"/>
+     <addaction name="actionTruncated_dodecahedron"/>
+     <addaction name="actionDiamond"/>
+     <addaction name="actionOther"/>
+    </widget>
+    <addaction name="menuOuvrir"/>
+   </widget>
+   <widget class="QMenu" name="menuAnimation">
+    <property name="title">
+     <string>Animation</string>
+    </property>
+    <addaction name="actionAnimate"/>
+   </widget>
+   <addaction name="menuFichier"/>
+   <addaction name="menuAnimation"/>
   </widget>
+  <action name="actionCube">
+   <property name="text">
+    <string>Cube</string>
+   </property>
+  </action>
+  <action name="actionOctahedron">
+   <property name="text">
+    <string>Octahedron</string>
+   </property>
+  </action>
+  <action name="actionDodecahedron">
+   <property name="text">
+    <string>Dodecahedron</string>
+   </property>
+  </action>
+  <action name="actionPyramid">
+   <property name="text">
+    <string>Pyramid</string>
+   </property>
+  </action>
+  <action name="actionTruncated_dodecahedron">
+   <property name="text">
+    <string>Truncated dodecahedron</string>
+   </property>
+  </action>
+  <action name="actionDiamond">
+   <property name="text">
+    <string>Diamond</string>
+   </property>
+  </action>
+  <action name="actionAnimate">
+   <property name="text">
+    <string>Animate</string>
+   </property>
+  </action>
+  <action name="actionOther">
+   <property name="text">
+    <string>Other...</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

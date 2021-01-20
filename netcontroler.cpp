@@ -18,6 +18,11 @@ NetControler::~NetControler()
 
 void NetControler::createNet(Mesh &mesh, Mesh &net)
 {
+    m_baseRotation.clear();
+    m_angles.clear();
+    m_parent.clear();
+    rootFace = nullptr;
+
     m_net = &net;
     for(Face *f : mesh.faces())
     {
@@ -80,7 +85,7 @@ void NetControler::createNet(Mesh &mesh, Mesh &net)
                     m_parent[tempHe->twin()->face()] = rootFace;
                     m_baseRotation[tempHe->twin()->face()] = tempHe->twin();
                     m_angles[tempHe->twin()->face()] = angleBetweenFaces(rootFace, tempHe->twin()->face(), tempHe->twin());
-                    qDebug() << "Father of" << tempHe->twin()->face()->name() <<"is" << rootFace->name();
+                    //qDebug() << "Father of" << tempHe->twin()->face()->name() <<"is" << rootFace->name();
                 }
                 tempHe = tempHe->next();
             } while (faceHe != tempHe);
@@ -184,7 +189,7 @@ float NetControler::angleBetweenFaces(Face *f1, Face *f2, HalfEdge *rotationAxis
     n2.normalize();
 
     float dotProduct = QVector3D::dotProduct(n1,n2);
-    qDebug() << "dot product =" << dotProduct;
+    //qDebug() << "dot product =" << dotProduct;
     float angle = qRadiansToDegrees(qAcos(dotProduct));
 
     QVector3D cross = QVector3D::crossProduct(n1, n2);
@@ -197,7 +202,7 @@ float NetControler::angleBetweenFaces(Face *f1, Face *f2, HalfEdge *rotationAxis
       angle = -angle;
     }
 
-    qDebug() << "angle entre face =" << angle;
+    //qDebug() << "angle entre face =" << angle;
 
     return angle;
 }
