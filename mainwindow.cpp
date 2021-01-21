@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    //qDebug() << "Refresh Rate :" << QGuiApplication::primaryScreen()->refreshRate();
+    qDebug() << "Refresh Rate :" << QGuiApplication::primaryScreen()->refreshRate();
     int interval = 1000/QGuiApplication::primaryScreen()->refreshRate();
     m_timerAnimation.setInterval(interval);
     connect(&m_timerAnimation, SIGNAL(timeout()), this, SLOT(animateOpenning()));
@@ -142,6 +142,8 @@ void MainWindow::animateOpenning()
     m_netControler.open(-ui->sliderOpening->sliderPosition());
     //then we open it at the right angle
     int val = 100/QGuiApplication::primaryScreen()->refreshRate();
+    if (val == 0)
+        val++;
     ui->sliderOpening->setValue(ui->sliderOpening->sliderPosition() + val * (m_isOpenning ? 1 : -1));
     if(ui->sliderOpening->value() >= 100)
         m_isOpenning = false;
