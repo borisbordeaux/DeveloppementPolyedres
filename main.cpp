@@ -7,9 +7,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    //smoother display
     QSurfaceFormat fmt;
     fmt.setDepthBufferSize(24);
+    //smoother display
     fmt.setSamples(4);
     fmt.setVersion(3,2);
     fmt.setProfile(QSurfaceFormat::CoreProfile);

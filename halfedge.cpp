@@ -8,7 +8,7 @@ HalfEdge::HalfEdge(Vertex *origin, QString name):
 
 }
 
-Vertex *HalfEdge::origin() const
+Vertex *HalfEdge::origin()
 {
     return m_origin;
 }
@@ -18,7 +18,7 @@ void HalfEdge::setOrigin(Vertex *origin)
     m_origin = origin;
 }
 
-Face *HalfEdge::face() const
+Face *HalfEdge::face()
 {
     return m_face;
 }
@@ -28,7 +28,7 @@ void HalfEdge::setFace(Face *face)
     m_face = face;
 }
 
-HalfEdge *HalfEdge::twin() const
+HalfEdge *HalfEdge::twin()
 {
     return m_twin;
 }
@@ -38,7 +38,7 @@ void HalfEdge::setTwin(HalfEdge *twin)
     m_twin = twin;
 }
 
-HalfEdge *HalfEdge::prev() const
+HalfEdge *HalfEdge::prev()
 {
     return m_prev;
 }
@@ -48,7 +48,7 @@ void HalfEdge::setPrev(HalfEdge *prev)
     m_prev = prev;
 }
 
-HalfEdge *HalfEdge::next() const
+HalfEdge *HalfEdge::next()
 {
     return m_next;
 }

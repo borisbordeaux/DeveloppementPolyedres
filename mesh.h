@@ -26,11 +26,15 @@ public:
      */
     QVector<Vertex *> vertices() const;
 
+    QVector<Vertex *> *verticesNotConst();
+
     /**
      * @brief getter
      * @return the vector of the halfedges of this mesh
      */
     QVector<HalfEdge *> halfEdges() const;
+
+    QVector<HalfEdge *> *halfEdgesNotConst();
 
     /**
      * @brief getter
@@ -38,6 +42,7 @@ public:
      */
     QVector<Face *> faces() const;
 
+    QVector<Face *> *facesNotConst();
     /**
      * @brief append a vertex to the list of vertices
      * @param v the vertex to append
@@ -55,6 +60,12 @@ public:
      * @param f the face to append
      */
     void append(Face *f);
+
+    void remove(Vertex *v);
+
+    void remove(HalfEdge *he);
+
+    void remove(Face *f);
 
     /**
      * @brief find one halfhedge that has the given name

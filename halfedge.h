@@ -21,7 +21,7 @@ public:
      * @brief getter
      * @return the origin of the halfedge
      */
-    Vertex *origin() const;
+    Vertex *origin();
 
     /**
      * @brief setter
@@ -33,7 +33,7 @@ public:
      * @brief getter
      * @return the face of this halfedge
      */
-    Face *face() const;
+    Face *face();
 
     /**
      * @brief setter
@@ -45,7 +45,7 @@ public:
      * @brief getter
      * @return the twin halfedge of this halfedge
      */
-    HalfEdge *twin() const;
+    HalfEdge *twin();
 
     /**
      * @brief setter
@@ -57,7 +57,7 @@ public:
      * @brief getter
      * @return the previous halfedge of this halfedge
      */
-    HalfEdge *prev() const;
+    HalfEdge *prev();
 
     /**
      * @brief setter
@@ -69,7 +69,7 @@ public:
      * @brief getter
      * @return the next halfedge of this halfedge
      */
-    HalfEdge *next() const;
+    HalfEdge *next();
 
     /**
      * @brief setter

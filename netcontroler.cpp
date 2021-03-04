@@ -3,8 +3,10 @@
 #include <QVector3D>
 #include <QVector4D>
 #include <QtMath>
+#include <QVector>
 
-NetControler::NetControler()
+NetControler::NetControler(Model *model):
+    m_model(model)
 {
 
 }
@@ -63,11 +65,60 @@ void NetControler::createNet(Mesh &mesh, Mesh &net)
                     he2->setTwin(he);
                 }
 
+    simplifyNet();
+
+    createTree();
+}
+
+void NetControler::open(int percent)
+{
+    QHash<Face*, QMatrix4x4> transformedFaces;
+    QMatrix4x4 identity;
+    transformedFaces[rootFace] = identity;
+
+    while(transformedFaces.size() != m_net->faces().size())
+        for(Face *f : m_net->faces())
+            //if a face is not transformed but his parent is transformed
+            if(!transformedFaces.contains(f) && transformedFaces.contains(m_parent[f]))
+                //then the face can be transformed
+                transformedFaces[f] = transform(f, percent, transformedFaces[m_parent[f]]);
+}
+
+void NetControler::updateRootFace()
+{
+    int index = m_model->selectedFace();
+    //qDebug() << "index selected is" << index;
+    if(index >= 0 && index < m_net->faces().size())
+    {
+        m_indexRootFace = index;
+        createTree();
+    }
+}
+
+void NetControler::translateFace(Face *f, float x, float y, float z)
+{
+    QMatrix4x4 translationOpening;
+    translationOpening.translate(x, y, z);
+    m_translationFaceOpening[f] = translationOpening;
+
+    QMatrix4x4 translationClosing;
+    translationClosing.translate(-x, -y, -z);
+    m_translationFaceClosing[f] = translationClosing;
+}
+
+void NetControler::createTree()
+{
+    m_parent.clear();
+    m_baseRotation.clear();
+    m_angles.clear();
+    m_translationFaceOpening.clear();
+    m_translationFaceClosing.clear();
+
     //define which face is the root
-    int rootIndex = 0;
+    int rootIndex = (m_indexRootFace >= 0 && m_indexRootFace < m_net->faces().size()) ? m_indexRootFace : 0;
     rootFace = m_net->faces().at(rootIndex);
 
-    qDebug() << "nb faces" << m_net->faces().size();
+    //qDebug() << "nb faces" << m_net->faces().size();
 
     //associate each face a parent : create a tree
     while (m_parent.size() != m_net->faces().size()-1)
@@ -112,18 +163,6 @@ void NetControler::createNet(Mesh &mesh, Mesh &net)
     } //end while each face doesn't have a parent
 }
 
-void NetControler::open(int percent)
-{
-    QHash<Face*, QMatrix4x4> transformedFaces;
-    QMatrix4x4 identity;
-    transformedFaces[rootFace] = identity;
-
-    while(transformedFaces.size() != m_net->faces().size())
-        for(Face *f : m_net->faces())
-            if(!transformedFaces.contains(f) && transformedFaces.contains(m_parent[f]))
-                transformedFaces[f] = transform(f, percent, transformedFaces[m_parent[f]]);
-}
-
 QMatrix4x4 NetControler::transform(Face *f, int percent, QMatrix4x4 parentTransform)
 {
     QVector3D origin(m_baseRotation[f]->origin()->x(),m_baseRotation[f]->origin()->y(),m_baseRotation[f]->origin()->z());
@@ -134,7 +173,12 @@ QMatrix4x4 NetControler::transform(Face *f, int percent, QMatrix4x4 parentTransf
     trans.rotate((float)percent * m_angles[f] / 100.0f, axis-origin);
     trans.translate(-origin);
 
-    trans = parentTransform * trans;
+    if(percent == 100 && m_translationFaceOpening.contains(f))
+        trans = m_translationFaceOpening[f] * parentTransform * trans;
+    else if(percent == -100 && m_translationFaceOpening.contains(f))
+        trans = parentTransform * m_translationFaceClosing[f] * trans;
+    else
+        trans = parentTransform * trans;
 
     HalfEdge *faceHe = f->halfEdge();
     HalfEdge *tempHe = f->halfEdge();
@@ -157,36 +201,8 @@ QMatrix4x4 NetControler::transform(Face *f, int percent, QMatrix4x4 parentTransf
 
 float NetControler::angleBetweenFaces(Face *f1, Face *f2, HalfEdge *rotationAxis)
 {
-    float x1 = f1->halfEdge()->origin()->x();
-    float y1 = f1->halfEdge()->origin()->y();
-    float z1 = f1->halfEdge()->origin()->z();
-
-    float x2 = f1->halfEdge()->next()->origin()->x();
-    float y2 = f1->halfEdge()->next()->origin()->y();
-    float z2 = f1->halfEdge()->next()->origin()->z();
-
-    float x3 = f1->halfEdge()->next()->next()->origin()->x();
-    float y3 = f1->halfEdge()->next()->next()->origin()->y();
-    float z3 = f1->halfEdge()->next()->next()->origin()->z();
-
-    QVector3D n1 = QVector3D::normal(QVector3D(x2 - x1, y2 - y1, z2 - z1), QVector3D(x3 - x2, y3 - y2, z3 - z2));
-
-    x1 = f2->halfEdge()->origin()->x();
-    y1 = f2->halfEdge()->origin()->y();
-    z1 = f2->halfEdge()->origin()->z();
-
-    x2 = f2->halfEdge()->next()->origin()->x();
-    y2 = f2->halfEdge()->next()->origin()->y();
-    z2 = f2->halfEdge()->next()->origin()->z();
-
-    x3 = f2->halfEdge()->next()->next()->origin()->x();
-    y3 = f2->halfEdge()->next()->next()->origin()->y();
-    z3 = f2->halfEdge()->next()->next()->origin()->z();
-
-    QVector3D n2 = QVector3D::normal(QVector3D(x2 - x1, y2 - y1, z2 - z1), QVector3D(x3 - x2, y3 - y2, z3 - z2));
-
-    n1.normalize();
-    n2.normalize();
+    QVector3D n1 = f1->computeNormal();
+    QVector3D n2 = f2->computeNormal();
 
     float dotProduct = QVector3D::dotProduct(n1,n2);
     //qDebug() << "dot product =" << dotProduct;
@@ -205,4 +221,91 @@ float NetControler::angleBetweenFaces(Face *f1, Face *f2, HalfEdge *rotationAxis
     //qDebug() << "angle entre face =" << angle;
 
     return angle;
+}
+
+void NetControler::simplifyNet()
+{
+    //merge neighboor faces with same normal
+    bool change = true;
+    while(change)
+    {
+        change = false;
+
+        //qDebug() << "nb Face" << m_net->facesNotConst()->size();
+
+        for(Face *f : (*m_net->facesNotConst()))
+        {
+            HalfEdge *he = f->halfEdge();
+            HalfEdge *heNext = he->next();
+            do{
+                if(haveSameNormal(f, heNext->twin()->face()))
+                {
+                    //qDebug() << "Faces has same normal ! Merging" << f->name() << "and" << heNext->twin()->face()->name();
+                    mergeFaces(f, heNext->twin()->face(), heNext);
+                    he = f->halfEdge();
+                    change = true;
+                }
+                //qDebug() << "next halfedge's twin's face to be compared";
+                heNext = heNext->next();
+            }while(he != heNext);
+        }
+    }
+}
+
+bool NetControler::haveSameNormal(Face *f1, Face *f2) const
+{
+    QVector3D n1 = f1->computeNormal();
+    QVector3D n2 = f2->computeNormal();
+
+    return abs(n1.x()-n2.x()) < 0.001 && abs(n1.y()-n2.y()) < 0.001 && abs(n1.z()-n2.z()) < 0.001;
+}
+
+void NetControler::mergeFaces(Face *f1, Face *f2, HalfEdge *he)
+{
+    //qDebug() << "init merge faces";
+    HalfEdge *h1 = he->next();
+    HalfEdge *h2 = he->prev();
+    //Vertex *B = h1->origin();
+    Vertex *C = he->origin();
+    HalfEdge *h4 = he->twin();
+    Vertex *D = h4->origin();
+    HalfEdge *h5 = h4->next();
+    Vertex *E = h5->origin();
+    HalfEdge *h6 = h4->prev();
+
+    //qDebug() << "change data";
+
+    h6->setNext(h1);
+    h1->setPrev(h6);
+    h2->setNext(h5);
+    h5->setPrev(h2);
+    C->setHalfEdge(h5);
+    h5->setOrigin(C);
+
+    //qDebug() << "nb HalfEdges before" << m_net->halfEdges().size();
+
+    //qDebug() << "remove data";
+    //qDebug() << "remove he";
+    m_net->remove(he);
+    //qDebug() << "remove h4";
+    m_net->remove(h4);
+    //qDebug() << "remove D";
+    m_net->remove(D);
+    //qDebug() << "remove E";
+    m_net->remove(E);
+    //qDebug() << "remove f2";
+    m_net->remove(f2);
+
+
+    //qDebug() << "nb HalfEdges after" << m_net->halfEdges().size();
+    //qDebug() << "associate faces";
+    HalfEdge *temp = h1;
+    f1->setHalfEdge(h1);
+    do
+    {
+        //qDebug() << "set right face to halfedges";
+        temp->setFace(f1);
+        temp = temp->next();
+    }while(temp != h1);
+    //qDebug() << "finished step face association !";
 }

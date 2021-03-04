@@ -36,7 +36,7 @@ void Vertex::setZ(float z)
     m_z = z;
 }
 
-HalfEdge *Vertex::halfEdge() const
+HalfEdge *Vertex::halfEdge()
 {
     return m_halfEdge;
 }

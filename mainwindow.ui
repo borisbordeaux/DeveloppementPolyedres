@@ -18,6 +18,18 @@
     <property name="sizeConstraint">
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -27,52 +39,17 @@
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <property name="leftMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="topMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetMinimumSize</enum>
-      </property>
-      <item>
-       <widget class="QSlider" name="sliderOpening">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -97,6 +74,7 @@
      <addaction name="actionCube"/>
      <addaction name="actionOctahedron"/>
      <addaction name="actionDodecahedron"/>
+     <addaction name="actionDodecahedron_Triangulated"/>
      <addaction name="actionPyramid"/>
      <addaction name="actionTruncated_dodecahedron"/>
      <addaction name="actionDiamond"/>
@@ -110,8 +88,23 @@
     </property>
     <addaction name="actionAnimate"/>
    </widget>
+   <widget class="QMenu" name="menuNet">
+    <property name="title">
+     <string>Net</string>
+    </property>
+    <addaction name="actionSet_selected_Face_as_root"/>
+   </widget>
+   <widget class="QMenu" name="menuSelection_Mode">
+    <property name="title">
+     <string>Selection Mode</string>
+    </property>
+    <addaction name="actionFaces"/>
+    <addaction name="actionEdges"/>
+   </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuAnimation"/>
+   <addaction name="menuNet"/>
+   <addaction name="menuSelection_Mode"/>
   </widget>
   <action name="actionCube">
    <property name="text">
@@ -151,6 +144,44 @@
   <action name="actionOther">
    <property name="text">
     <string>Other...</string>
+   </property>
+  </action>
+  <action name="actionDodecahedron_Triangulated">
+   <property name="text">
+    <string>Dodecahedron Triangulated</string>
+   </property>
+  </action>
+  <action name="actionSet_selected_Face_as_root">
+   <property name="text">
+    <string>Set selected Face as root</string>
+   </property>
+   <property name="shortcut">
+    <string>U</string>
+   </property>
+  </action>
+  <action name="actionFaces">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Faces</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
+  </action>
+  <action name="actionEdges">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edges</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
    </property>
   </action>
  </widget>

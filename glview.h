@@ -9,6 +9,12 @@
 #include <QOpenGLShaderProgram>
 #include <QTimer>
 #include "model.h"
+#include "netcontroler.h"
+
+enum SelectionMode
+{
+    FACES, EDGES
+};
 
 class GLView : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -20,7 +26,7 @@ public:
      * @param model the model that has to be drawn
      * @param parent the parent of this widget
      */
-    GLView(Model *model, QWidget *parent = 0);
+    GLView(Model *model, NetControler *netControler, QWidget *parent = 0);
     ~GLView();
 
     /**
@@ -47,17 +53,25 @@ public:
      */
     void setZRotation(int angle);
 
+    /**
+     * @brief indicates that the mesh data has to be
+     * sent to the GPU because there was a change, like
+     * the selected face or edge
+     */
     void meshUpdated();
 
-public slots:
-    void meshChanged();
-
-private slots:
     /**
-     * @brief slot to update the screen using a timer. It is
-     * to control the framerate of the widget for animation
+     * @brief setter, set the selection mode for item picking
+     * @param mode the mode to set
      */
-    void screenUpdate();
+    void setSelectionMode(SelectionMode mode);
+
+public slots:
+    /**
+     * @brief indicates that the mesh changed, so we have
+     * to reallocate memory and resend
+     */
+    void meshChanged();
 
 protected:
     // QOpenGLWidget interface
@@ -69,8 +83,14 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 
 private:
+
+    //the controler for modification of the model
+    NetControler *m_netControler;
+
     //rotation of the model
     int m_xRot = 0;
     int m_yRot = 0;
@@ -88,21 +108,39 @@ private:
     //OpenGL stuff for rendering
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_vbo;
+    QOpenGLBuffer m_vboEdge;
     QOpenGLShaderProgram *m_program = nullptr;
+    QOpenGLShaderProgram *m_programEdge = nullptr;
 
     //location of the differents variables in the GPU
     int m_projMatrixLoc = 0;
     int m_mvMatrixLoc = 0;
     int m_normalMatrixLoc = 0;
     int m_lightPosLoc = 0;
+    int m_cameraPosLoc = 0;
+    int m_modelMatrixLoc = 0;
+
+    int m_projMatrixLocEdge = 0;
+    int m_mvMatrixLocEdge = 0;
+
+    int m_isPickingLoc = 0;
+    int m_isPickingLocEdge = 0;
 
     //matrices for rendering
     QMatrix4x4 m_proj;
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
 
+    float m_cameraZ = 7.0;
+
     //the model that will be displayed
     Model *m_model;
+
+    //useful for item selection
+    bool m_clicked = false;
+    QPoint m_clickPos;
+
+    SelectionMode m_selectionMode = FACES;
 };
 
 #endif // GLVIEW_H

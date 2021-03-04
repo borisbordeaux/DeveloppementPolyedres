@@ -56,7 +56,7 @@ public:
      * @brief getter
      * @return a halfedge from which this point is its origin
      */
-    HalfEdge *halfEdge() const;
+    HalfEdge *halfEdge();
 
     /**
      * @brief setter

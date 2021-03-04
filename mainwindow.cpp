@@ -12,9 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
       m_netMesh(),
       m_polyhedron(),
       m_net(),
-      m_polyedronView(&m_polyhedron),
-      m_netView(&m_net),
-      m_netControler()
+      m_netControler(&m_net),
+      m_polyedronView(&m_polyhedron, &m_netControler),
+      m_netView(&m_net, &m_netControler)
 {
     ui->setupUi(this);
 
@@ -33,8 +33,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     openMesh(file);
 
-    ui->verticalLayout->addWidget(&m_polyedronView);
     ui->verticalLayout->addWidget(&m_netView);
+    QVBoxLayout *layout = new QVBoxLayout();
+    m_sliderOpening = new QSlider(Qt::Orientation::Vertical);
+    m_sliderOpening->setMinimum(0);
+    m_sliderOpening->setMaximum(100);
+    m_sliderOpening->setValue(0);
+    connect(m_sliderOpening, SIGNAL(actionTriggered(int)), this, SLOT(on_sliderOpening_actionTriggered()));
+    layout->addWidget(m_sliderOpening);
+    m_netView.setLayout(layout);
 }
 
 MainWindow::~MainWindow()
@@ -50,7 +57,10 @@ void MainWindow::openMesh(QString &path)
 
     OBJReader::readOBJ(path, &m_polyhedronMesh);
 
+    m_net.setSelected(0);
     m_netControler.createNet(m_polyhedronMesh, m_netMesh);
+    m_netControler.updateRootFace();
+    m_net.setSelected(-1);
 
     m_net.setMesh(&m_netMesh);
     m_polyhedron.setMesh(&m_polyhedronMesh);
@@ -58,10 +68,10 @@ void MainWindow::openMesh(QString &path)
 
 void MainWindow::openFile(QString &path)
 {
-    ui->sliderOpening->setValue(0);
+    m_sliderOpening->setValue(0);
     openMesh(path);
     m_netView.meshChanged();
-    m_polyedronView.meshChanged();
+    //m_polyedronView.meshChanged();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -70,15 +80,19 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     case Qt::Key_Q:
         close();
         break;
+    case Qt::Key_A:
+        QVector3D n = m_netMesh.faces().at(0)->computeNormal();
+        m_netControler.translateFace(m_netMesh.faces().at(m_net.selectedFace()), n.x(),n.y(),n.z());
+        break;
     }
 }
 
-void MainWindow::on_sliderOpening_actionTriggered(int action)
+void MainWindow::on_sliderOpening_actionTriggered()
 {
     //we close the net
-    m_netControler.open(-ui->sliderOpening->value());
+    m_netControler.open(-m_sliderOpening->value());
     //then we open it at the right angle
-    m_netControler.open(ui->sliderOpening->sliderPosition());
+    m_netControler.open(m_sliderOpening->sliderPosition());
     m_net.updateData();
     m_netView.meshUpdated();
     m_netView.update();
@@ -126,30 +140,30 @@ void MainWindow::on_actionAnimate_triggered()
     {
         m_timerAnimation.stop();
         ui->actionAnimate->setText("Animate");
-        ui->sliderOpening->setDisabled(false);
+        m_sliderOpening->setDisabled(false);
     }
     else
     {
         m_timerAnimation.start();
         ui->actionAnimate->setText("Stop");
-        ui->sliderOpening->setDisabled(true);
+        m_sliderOpening->setDisabled(true);
     }
 }
 
 void MainWindow::animateOpenning()
 {
     //we close the net
-    m_netControler.open(-ui->sliderOpening->sliderPosition());
+    m_netControler.open(-m_sliderOpening->sliderPosition());
     //then we open it at the right angle
     int val = 100/QGuiApplication::primaryScreen()->refreshRate();
     if (val == 0)
         val++;
-    ui->sliderOpening->setValue(ui->sliderOpening->sliderPosition() + val * (m_isOpenning ? 1 : -1));
-    if(ui->sliderOpening->value() >= 100)
+    m_sliderOpening->setValue(m_sliderOpening->sliderPosition() + val * (m_isOpenning ? 1 : -1));
+    if(m_sliderOpening->value() >= 100)
         m_isOpenning = false;
-    if(ui->sliderOpening->value() <= 0)
+    if(m_sliderOpening->value() <= 0)
         m_isOpenning = true;
-    m_netControler.open(ui->sliderOpening->value());
+    m_netControler.open(m_sliderOpening->value());
     m_net.updateData();
     m_netView.meshUpdated();
     m_netView.update();
@@ -160,4 +174,46 @@ void MainWindow::on_actionOther_triggered()
     QString file = QFileDialog::getOpenFileName(this, "Open OBJ", "", "OBJ Files (*.obj)");
     if (file != "")
         openFile(file);
+}
+
+void MainWindow::on_actionDodecahedron_Triangulated_triggered()
+{
+    QString file = ":/obj_files/obj_files/dodecahedron_triangulated.obj";
+    openFile(file);
+}
+
+void MainWindow::on_actionSet_selected_Face_as_root_triggered()
+{
+    //we close the net
+    m_netControler.open(-m_sliderOpening->value());
+    //we change the root face
+    m_netControler.updateRootFace();
+    //we open the net at the same angle
+    m_netControler.open(m_sliderOpening->value());
+    //we update the view
+    m_net.updateData();
+    m_netView.meshUpdated();
+    m_netView.update();
+}
+
+void MainWindow::on_actionFaces_triggered(bool checked)
+{
+    if(checked)
+    {
+        m_netView.setSelectionMode(FACES);
+        ui->actionEdges->setChecked(false);
+    }else{
+        ui->actionFaces->setChecked(true);
+    }
+}
+
+void MainWindow::on_actionEdges_triggered(bool checked)
+{
+    if(checked)
+    {
+        m_netView.setSelectionMode(EDGES);
+        ui->actionFaces->setChecked(false);
+    }else{
+        ui->actionEdges->setChecked(true);
+    }
 }
