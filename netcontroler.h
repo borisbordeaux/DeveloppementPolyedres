@@ -17,9 +17,27 @@ public:
 
     void updateRootFace();
 
-    void translateFace(Face *f, float x, float y, float z);
+    void translateFace(Face *f, float range);
+
+    void setFaceAsParent(Face *f);
+
+    int getPercentOpening();
+
+    void removeTabs();
+    void createTabs();
+
+    void setDisplayTabs(bool display);
 
 private:
+    void automaticallyAddTabs();
+
+    void addTabToHalfEdge(HalfEdge *he);
+
+    void createTab(HalfEdge *he);
+
+    void setFaceAsParent(Face *f, bool rewriteParent);
+
+    bool findLoop(Face *child, Face *parent) const;
 
     void createTree();
 
@@ -35,10 +53,23 @@ private:
     QMap<Face*, Face*> m_parent;
     QMap<Face*, QMatrix4x4> m_translationFaceOpening;
     QMap<Face*, QMatrix4x4> m_translationFaceClosing;
-    Face *rootFace;
-    int m_indexRootFace = 0;
+
+    Face *m_rootFace;
     Mesh *m_net;
     Model *m_model;
+
+    int m_percentOpening = 0;
+    bool m_wasFullyOpened = false;
+
+    bool m_displayTabs = true;
+    float m_tabAngle = 30.0f;
+    float m_tabDist = 0.15f;
+
+    QVector<HalfEdge *> m_heWithTab;
+    QVector<Face *> m_tabFaces;
+    QVector<HalfEdge *> m_tabHalfEdges;
+    QVector<Vertex *> m_tabVertices;
+
 };
 
 #endif // NETCONTROLER_H

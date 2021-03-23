@@ -9,8 +9,9 @@ class OBJReader
 public:
     /**
      * @brief reads an OBJ file whose fullname is specified
-     * @param filename the full name of the OBJ file ot read
-     * @return a pointer to a Mesh based on the OBJ file
+     * @param filename the full name of the OBJ file to read
+     * @param mesh the mesh that will be filled with the data
+     * of the OBJ file given
      */
     static void readOBJ(QString &filename, Mesh *mesh);
 };

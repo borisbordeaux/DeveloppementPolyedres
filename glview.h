@@ -24,6 +24,7 @@ public:
     /**
      * @brief Construct an OpenGL widget that will draw a Model
      * @param model the model that has to be drawn
+     * @param netControler the net controler used to control the net
      * @param parent the parent of this widget
      */
     GLView(Model *model, NetControler *netControler, QWidget *parent = 0);
@@ -54,24 +55,21 @@ public:
     void setZRotation(int angle);
 
     /**
-     * @brief indicates that the mesh data has to be
-     * sent to the GPU because there was a change, like
-     * the selected face or edge
-     */
-    void meshUpdated();
-
-    /**
      * @brief setter, set the selection mode for item picking
      * @param mode the mode to set
      */
     void setSelectionMode(SelectionMode mode);
 
-public slots:
     /**
      * @brief indicates that the mesh changed, so we have
-     * to reallocate memory and resend
+     * to reallocate memory and resend data to the GPU
      */
     void meshChanged();
+
+    void setViewFace(Face *f);
+    Face* getViewFace();
+
+    void setExportNet(QString path);
 
 protected:
     // QOpenGLWidget interface
@@ -88,6 +86,11 @@ protected:
 
 private:
 
+    void computeWorldMatrix();
+    void clickFaceManagement();
+    void clickEdgeManagement();
+    void exportNet();
+
     //the controler for modification of the model
     NetControler *m_netControler;
 
@@ -95,11 +98,6 @@ private:
     int m_xRot = 0;
     int m_yRot = 0;
     int m_zRot = 0;
-
-    //used to optimize the rendering
-    //when nothing changed
-    bool m_matrixChanged = true;
-    bool m_modelChanged = true;
 
     //the last position of the mouse
     //used for rotation
@@ -141,6 +139,11 @@ private:
     QPoint m_clickPos;
 
     SelectionMode m_selectionMode = FACES;
+
+    Face *m_viewFace = nullptr;
+
+    bool m_exportNet = false;
+    QString m_exportPath;
 };
 
 #endif // GLVIEW_H

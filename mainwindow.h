@@ -30,7 +30,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
-    void on_sliderOpening_actionTriggered();
+    void sliderOpening();
 
     void on_actionCube_triggered();
 
@@ -58,6 +58,28 @@ private slots:
 
     void on_actionEdges_triggered(bool checked);
 
+    void on_actionSet_selected_Face_as_parent_triggered();
+
+    void on_actionTranslate_selected_Face_triggered();
+
+    void on_action1_triggered();
+
+    void on_action2_triggered();
+
+    void on_action3_triggered();
+
+    void on_action4_triggered();
+
+    void on_action5_triggered();
+
+    void on_actionView_Selected_Face_triggered();
+
+    void on_actionExport_PNG_triggered();
+
+    void on_actionNomal_View_triggered();
+
+    void on_actionDisplay_Tabs_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
 
@@ -67,21 +89,19 @@ private:
     Mesh m_polyhedronMesh;
     Mesh m_netMesh;
 
-    //the polyhedron and its net that read the
-    //meshes and throw the data to the view
-    Model m_polyhedron;
+    //the model of the net that read the
+    //mesh and throw the data to the view
     Model m_net;
 
     //net controler that will do the openning
     NetControler m_netControler;
 
-    //OpenGL Widgets that will draw the meshes
-    GLView m_polyedronView;
+    //OpenGL Widgets that will draw the mesh
     GLView m_netView;
 
     QTimer m_timerAnimation;
     bool m_isOpenning = true;
 
-
+    int m_translationValue = 1;
 };
 #endif // MAINWINDOW_H

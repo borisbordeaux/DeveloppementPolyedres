@@ -26,15 +26,11 @@ public:
      */
     QVector<Vertex *> vertices() const;
 
-    QVector<Vertex *> *verticesNotConst();
-
     /**
      * @brief getter
      * @return the vector of the halfedges of this mesh
      */
     QVector<HalfEdge *> halfEdges() const;
-
-    QVector<HalfEdge *> *halfEdgesNotConst();
 
     /**
      * @brief getter
@@ -42,7 +38,6 @@ public:
      */
     QVector<Face *> faces() const;
 
-    QVector<Face *> *facesNotConst();
     /**
      * @brief append a vertex to the list of vertices
      * @param v the vertex to append
@@ -61,10 +56,22 @@ public:
      */
     void append(Face *f);
 
+    /**
+     * @brief remove a vertex of the mesh
+     * @param v the vertex to remove
+     */
     void remove(Vertex *v);
 
+    /**
+     * @brief remove a halfedge of the mesh
+     * @param he the halfedge to remove
+     */
     void remove(HalfEdge *he);
 
+    /**
+     * @brief remove a face of the mesh
+     * @param f the face to remove
+     */
     void remove(Face *f);
 
     /**
@@ -74,15 +81,23 @@ public:
      */
     HalfEdge *findByName(const QString &name);
 
+    /**
+     * @brief remove all faces, vertices and halfedges
+     */
     void reset();
 
 private:
+    //vertices of the mesh
     QVector<Vertex*> m_vertices;
+    //halfedges of the mesh
     QVector<HalfEdge*> m_halfEdges;
+    //faces of the mesh
     QVector<Face*> m_faces;
 
     //to enhance the finding of
     //one halfedge by its name
+    //we store each halfedge
+    //using their unique name
     QMap<QString, int> m_map;
 };
 

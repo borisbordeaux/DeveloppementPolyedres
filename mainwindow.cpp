@@ -10,36 +10,25 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),
       m_polyhedronMesh(),
       m_netMesh(),
-      m_polyhedron(),
       m_net(),
       m_netControler(&m_net),
-      m_polyedronView(&m_polyhedron, &m_netControler),
       m_netView(&m_net, &m_netControler)
 {
     ui->setupUi(this);
-
-    qDebug() << "Refresh Rate :" << QGuiApplication::primaryScreen()->refreshRate();
-    int interval = 1000/QGuiApplication::primaryScreen()->refreshRate();
-    m_timerAnimation.setInterval(interval);
     connect(&m_timerAnimation, SIGNAL(timeout()), this, SLOT(animateOpenning()));
 
+    //default mesh : a cube
     QString file = ":/obj_files/obj_files/cube.obj";
-    //QString file = ":/obj_files/obj_files/diamond.obj";
-    //QString file = ":/obj_files/obj_files/dodecahedron_face_pentagon.obj";
-    //QString file = ":/obj_files/obj_files/dodecahedron_triangulated.obj";
-    //QString file = ":/obj_files/obj_files/octahedron.obj";
-    //QString file = ":/obj_files/obj_files/pyramid.obj";
-    //QString file = ":/obj_files/obj_files/truncated_dodecahedron.obj";
-
     openMesh(file);
 
+    //add the net view
     ui->verticalLayout->addWidget(&m_netView);
     QVBoxLayout *layout = new QVBoxLayout();
     m_sliderOpening = new QSlider(Qt::Orientation::Vertical);
     m_sliderOpening->setMinimum(0);
     m_sliderOpening->setMaximum(100);
     m_sliderOpening->setValue(0);
-    connect(m_sliderOpening, SIGNAL(actionTriggered(int)), this, SLOT(on_sliderOpening_actionTriggered()));
+    connect(m_sliderOpening, SIGNAL(actionTriggered(int)), this, SLOT(sliderOpening()));
     layout->addWidget(m_sliderOpening);
     m_netView.setLayout(layout);
 }
@@ -54,16 +43,15 @@ void MainWindow::openMesh(QString &path)
 {
     m_polyhedronMesh.reset();
     m_netMesh.reset();
+    m_netView.setViewFace(nullptr);
+    m_net.setSelected(-1);
 
     OBJReader::readOBJ(path, &m_polyhedronMesh);
 
-    m_net.setSelected(0);
     m_netControler.createNet(m_polyhedronMesh, m_netMesh);
     m_netControler.updateRootFace();
-    m_net.setSelected(-1);
 
     m_net.setMesh(&m_netMesh);
-    m_polyhedron.setMesh(&m_polyhedronMesh);
 }
 
 void MainWindow::openFile(QString &path)
@@ -71,7 +59,6 @@ void MainWindow::openFile(QString &path)
     m_sliderOpening->setValue(0);
     openMesh(path);
     m_netView.meshChanged();
-    //m_polyedronView.meshChanged();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -80,22 +67,32 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     case Qt::Key_Q:
         close();
         break;
-    case Qt::Key_A:
-        QVector3D n = m_netMesh.faces().at(0)->computeNormal();
-        m_netControler.translateFace(m_netMesh.faces().at(m_net.selectedFace()), n.x(),n.y(),n.z());
-        break;
     }
 }
 
-void MainWindow::on_sliderOpening_actionTriggered()
+void MainWindow::sliderOpening()
 {
-    //we close the net
-    m_netControler.open(-m_sliderOpening->value());
-    //then we open it at the right angle
-    m_netControler.open(m_sliderOpening->sliderPosition());
-    m_net.updateData();
-    m_netView.meshUpdated();
-    m_netView.update();
+    int oldPercent = m_netControler.getPercentOpening();
+
+    //we open the net at the angle that is the difference
+    //between the slider position (new state of opening)
+    //and the slider value (old state of opening)ù
+    int percent = m_sliderOpening->sliderPosition()-oldPercent;
+
+    //there is no need to perform an opening of 0%
+    if(percent != 0)
+    {
+        m_netControler.open(percent);
+
+        //we update the data of the model
+        m_net.updateData();
+
+        if(m_netControler.getPercentOpening() == 100 || oldPercent == 100)
+            m_netView.meshChanged();
+
+        //then we update the view
+        m_netView.update();
+    }
 }
 
 void MainWindow::on_actionCube_triggered()
@@ -152,20 +149,18 @@ void MainWindow::on_actionAnimate_triggered()
 
 void MainWindow::animateOpenning()
 {
-    //we close the net
-    m_netControler.open(-m_sliderOpening->sliderPosition());
+    int oldPosition = m_sliderOpening->sliderPosition();
+
     //then we open it at the right angle
-    int val = 100/QGuiApplication::primaryScreen()->refreshRate();
-    if (val == 0)
-        val++;
-    m_sliderOpening->setValue(m_sliderOpening->sliderPosition() + val * (m_isOpenning ? 1 : -1));
-    if(m_sliderOpening->value() >= 100)
+    m_sliderOpening->setValue(m_sliderOpening->sliderPosition() + (m_isOpenning ? 1 : -1));
+    //we update if we are opening or closing the net
+    if(m_sliderOpening->value() == 100)
         m_isOpenning = false;
-    if(m_sliderOpening->value() <= 0)
+    if(m_sliderOpening->value() == 0)
         m_isOpenning = true;
-    m_netControler.open(m_sliderOpening->value());
+
+    m_netControler.open(m_sliderOpening->value() - oldPosition);
     m_net.updateData();
-    m_netView.meshUpdated();
     m_netView.update();
 }
 
@@ -192,7 +187,7 @@ void MainWindow::on_actionSet_selected_Face_as_root_triggered()
     m_netControler.open(m_sliderOpening->value());
     //we update the view
     m_net.updateData();
-    m_netView.meshUpdated();
+
     m_netView.update();
 }
 
@@ -216,4 +211,116 @@ void MainWindow::on_actionEdges_triggered(bool checked)
     }else{
         ui->actionEdges->setChecked(true);
     }
+}
+
+void MainWindow::on_actionSet_selected_Face_as_parent_triggered()
+{
+    if(m_net.selectedFace() != nullptr)
+    {
+        m_netControler.setFaceAsParent(m_net.selectedFace());
+        m_netView.update();
+    }
+}
+
+void MainWindow::on_actionTranslate_selected_Face_triggered()
+{
+    if(m_net.selectedFace() != nullptr)
+    {
+        m_netControler.translateFace(m_net.selectedFace(), m_translationValue);
+        m_netView.meshChanged();
+        m_netView.update();
+    }
+}
+
+void MainWindow::on_action1_triggered()
+{
+    //we change the translation value
+    m_translationValue = 1;
+
+    ui->action1->setChecked(true);
+    ui->action2->setChecked(false);
+    ui->action3->setChecked(false);
+    ui->action4->setChecked(false);
+    ui->action5->setChecked(false);
+}
+
+void MainWindow::on_action2_triggered()
+{
+    //we change the translation value
+    m_translationValue = 2;
+
+    ui->action1->setChecked(false);
+    ui->action2->setChecked(true);
+    ui->action3->setChecked(false);
+    ui->action4->setChecked(false);
+    ui->action5->setChecked(false);
+}
+
+void MainWindow::on_action3_triggered()
+{
+    //we change the translation value
+    m_translationValue = 3;
+
+    ui->action1->setChecked(false);
+    ui->action2->setChecked(false);
+    ui->action3->setChecked(true);
+    ui->action4->setChecked(false);
+    ui->action5->setChecked(false);
+}
+
+void MainWindow::on_action4_triggered()
+{
+    //we change the translation value
+    m_translationValue = 4;
+
+    ui->action1->setChecked(false);
+    ui->action2->setChecked(false);
+    ui->action3->setChecked(false);
+    ui->action4->setChecked(true);
+    ui->action5->setChecked(false);
+}
+
+void MainWindow::on_action5_triggered()
+{
+    //we change the translation value
+    m_translationValue = 5;
+
+    ui->action1->setChecked(false);
+    ui->action2->setChecked(false);
+    ui->action3->setChecked(false);
+    ui->action4->setChecked(false);
+    ui->action5->setChecked(true);
+}
+
+void MainWindow::on_actionView_Selected_Face_triggered()
+{
+    m_netView.setViewFace(m_net.selectedFace());
+    m_netView.update();
+}
+
+void MainWindow::on_actionExport_PNG_triggered()
+{
+    //defining the path
+    QString path = QFileDialog::getSaveFileName(this,tr("Save File"), QDir::toNativeSeparators(QDir::homePath()), tr("Images (*.png);;All files (*)"));
+    //cancel if no path were chosen
+    if(path.compare("") != 0)
+    {
+        path = QDir::toNativeSeparators(path);
+        m_netView.setExportNet(path);
+        m_netView.update();
+    }
+}
+
+void MainWindow::on_actionNomal_View_triggered()
+{
+    m_netView.setViewFace(nullptr);
+    m_netView.update();
+}
+
+void MainWindow::on_actionDisplay_Tabs_triggered(bool checked)
+{
+    m_netControler.setDisplayTabs(checked);
+    m_net.updateData();
+    m_netView.meshChanged();
+    m_netView.update();
 }

@@ -76,7 +76,12 @@ public:
      */
     void setName(const QString &name);
 
-    bool equals(Vertex &other) const;
+    /**
+     * @brief tests if the vertices are at the same position
+     * @param other the vertex that has to be tested
+     * @return true if the vertices has the same position, false otherwise
+     */
+    bool equals(Vertex *other);
 
 private:
     //coordinates of this vertex

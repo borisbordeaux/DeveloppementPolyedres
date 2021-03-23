@@ -30,6 +30,7 @@ SOURCES += \
     vertex.cpp
 
 HEADERS += \
+    shaders.h \
     face.h \
     glview.h \
     halfedge.h \

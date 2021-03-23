@@ -11,47 +11,62 @@ class Model
 public:
     /**
      * @brief Construct a Model based on a mesh
-     * @param mesh the mesh this model is based on
      */
     Model();
 
     /**
      * @brief getter
-     * @return constant data to be thrown to the GPU
+     * @return constant data of the polyhedron to be thrown to the GPU
      */
     const GLfloat *constData() const { return m_data.constData(); }
 
+    /**
+     * @brief getter
+     * @return constant data of edges to be thrown to the GPU
+     */
     const GLfloat *constDataEdge() const { return m_dataEdge.constData(); }
 
     /**
      * @brief getter
-     * @return the amount of data this model has
+     * @return the amount of data the polyhedron has
      */
     int count() const { return m_count; }
 
+    /**
+     * @brief getter
+     * @return the amount of data the edges has
+     */
     int countEdge() const { return m_countEdge; }
 
     /**
      * @brief getter
-     * @return the number of vertex
+     * @return the number of vertices the polyhedron has
      */
     int vertexCount() const { return m_count / 8; }
 
+    /**
+     * @brief getter
+     * @return the number of vertices the edges has
+     */
     int vertexCountEdge() const { return m_countEdge / 5; }
 
     /**
-     * @brief updateDataWithMesh update the constData
-     * of this model based on its mesh. It is necessary
-     * when the mesh changed
-     * TODO: set it as a slot in order to open any mesh
-     * and synchronize the views
+     * @brief update the data of the polyhedron based
+     * on its mesh, necessary when the mesh changed.
+     * Calls updateDataEdge()
      */
     void updateData();
+
+    /**
+     * @brief update the data of the edges based
+     * on its mesh, necessary when the mesh changed
+     */
     void updateDataEdge();
 
     /**
      * @brief setter
-     * @param mesh the mesh to set to this model
+     * @param mesh the mesh to set to this model.
+     * Calls updateData()
      */
     void setMesh(Mesh *mesh);
 
@@ -61,26 +76,43 @@ public:
      */
     void setSelected(int faceIndex);
 
-    int selectedFace() const;
+    /**
+     * @brief getter
+     * @return the index of the selected face
+     */
+    int indexSelectedFace() const;
+
+    Face *selectedFace();
 
     /**
      * @brief setEdgeSelected
      * @param edgeIndex, the index of the edge to be selected +1
      */
     void setEdgeSelected(int edgeIndex);
+
+    /**
+     * @brief getter
+     * @return the index of the selected edge
+     */
     int selectedEdge() const;
+
+    void addFace(Face *f, int ID);
 
 private:
     /**
      * @brief add a vertex, its normal and its ID to the data
      * @param v the vertex to add
      * @param n the normal of the vertex
+     * @param ID the ID of the face
+     * @param isSelected has to be true if the face is selected
      */
     void add(const QVector3D &v, const QVector3D &n, float ID, float isSelected);
 
     /**
      * @brief add a vertex to the edge data
-     * @param v te vertx to add
+     * @param v te vertex to add
+     * @param ID the ID of the edge
+     * @param isSelected has to be true if the edge is selected
      */
     void add(const QVector3D &v, float ID, float isSelected);
 
@@ -91,11 +123,21 @@ private:
      * @param x1, y1, z1 the values of the first vertex
      * @param x2, y2, z2 the values of the second vertex
      * @param x3, y3, z3 the values of the third vertex
+     * @param ID the ID of the face
+     * @param isSelected has to be true if the face is selected
      */
     void triangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2, GLfloat x3, GLfloat y3, GLfloat z3, GLfloat ID, GLfloat isSelected);
 
+    /**
+     * @brief getter
+     * @return the number of triangles of the polyhedron
+     */
     int findNbOfTriangle() const;
 
+    /**
+     * @brief getter
+     * @return the number of edges
+     */
     int findNbOfEdges() const;
 
     //the data of this model

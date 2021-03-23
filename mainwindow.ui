@@ -92,7 +92,20 @@
     <property name="title">
      <string>Net</string>
     </property>
+    <widget class="QMenu" name="menuTranslation_value">
+     <property name="title">
+      <string>Translation value</string>
+     </property>
+     <addaction name="action1"/>
+     <addaction name="action2"/>
+     <addaction name="action3"/>
+     <addaction name="action4"/>
+     <addaction name="action5"/>
+    </widget>
     <addaction name="actionSet_selected_Face_as_root"/>
+    <addaction name="actionSet_selected_Face_as_parent"/>
+    <addaction name="actionTranslate_selected_Face"/>
+    <addaction name="menuTranslation_value"/>
    </widget>
    <widget class="QMenu" name="menuSelection_Mode">
     <property name="title">
@@ -101,10 +114,20 @@
     <addaction name="actionFaces"/>
     <addaction name="actionEdges"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionView_Selected_Face"/>
+    <addaction name="actionNomal_View"/>
+    <addaction name="actionExport_PNG"/>
+    <addaction name="actionDisplay_Tabs"/>
+   </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuAnimation"/>
    <addaction name="menuNet"/>
    <addaction name="menuSelection_Mode"/>
+   <addaction name="menuView"/>
   </widget>
   <action name="actionCube">
    <property name="text">
@@ -140,6 +163,9 @@
    <property name="text">
     <string>Animate</string>
    </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
   </action>
   <action name="actionOther">
    <property name="text">
@@ -156,7 +182,7 @@
     <string>Set selected Face as root</string>
    </property>
    <property name="shortcut">
-    <string>U</string>
+    <string>R</string>
    </property>
   </action>
   <action name="actionFaces">
@@ -182,6 +208,109 @@
    </property>
    <property name="shortcut">
     <string>E</string>
+   </property>
+  </action>
+  <action name="actionSet_selected_Face_as_parent">
+   <property name="text">
+    <string>Set selected Face as parent</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="actionTranslate_selected_Face">
+   <property name="text">
+    <string>Translate selected Face</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="action3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="action4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4</string>
+   </property>
+  </action>
+  <action name="action5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>5</string>
+   </property>
+  </action>
+  <action name="actionView_Selected_Face">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>View Selected Face</string>
+   </property>
+   <property name="shortcut">
+    <string>V</string>
+   </property>
+  </action>
+  <action name="actionExport_PNG">
+   <property name="text">
+    <string>Export PNG</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionNomal_View">
+   <property name="text">
+    <string>Nomal View</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
+   </property>
+  </action>
+  <action name="actionDisplay_Tabs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display Tabs</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
    </property>
   </action>
  </widget>

@@ -56,7 +56,8 @@ void Vertex::setName(const QString &name)
     m_name = name;
 }
 
-bool Vertex::equals(Vertex &other) const
+bool Vertex::equals(Vertex *other)
 {
-    return abs(m_x - other.m_x) < 0.001 && abs(m_y - other.m_y) < 0.001 && abs(m_z - other.m_z) < 0.001;
+    //compare each coordinate
+    return abs(m_x - other->m_x) < 0.001 && abs(m_y - other->m_y) < 0.001 && abs(m_z - other->m_z) < 0.001;
 }

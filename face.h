@@ -39,10 +39,18 @@ public:
      */
     void setName(const QString &name);
 
+    /**
+     * @brief compute the normal of the face
+     * @return the normalized normal of the face
+     */
     QVector3D computeNormal();
 
+    QVector3D getCenter();
+
 private:
+    //the name of the face
     QString m_name;
+    //the halfedge of the face
     HalfEdge *m_halfEdge;
 };
 

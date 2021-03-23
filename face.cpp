@@ -1,5 +1,4 @@
 #include "face.h"
-#include <QDebug>
 
 Face::Face(QString name, HalfEdge *halfEdge):
     m_name(name), m_halfEdge(halfEdge)
@@ -29,6 +28,7 @@ void Face::setName(const QString &name)
 
 QVector3D Face::computeNormal()
 {
+    //take 3 points of the face
     float x1 = this->halfEdge()->origin()->x();
     float y1 = this->halfEdge()->origin()->y();
     float z1 = this->halfEdge()->origin()->z();
@@ -41,5 +41,23 @@ QVector3D Face::computeNormal()
     float y3 = this->halfEdge()->next()->next()->origin()->y();
     float z3 = this->halfEdge()->next()->next()->origin()->z();
 
+    //then compute the normal of the vectors created using the taken points
     return QVector3D::normal(QVector3D(x2 - x1, y2 - y1, z2 - z1), QVector3D(x3 - x2, y3 - y2, z3 - z2));
+}
+
+QVector3D Face::getCenter()
+{
+    QVector3D center(0,0,0);
+    float nb = 0;
+    HalfEdge *he = m_halfEdge;
+    do
+    {
+        center += QVector3D(he->origin()->x(), he->origin()->y(), he->origin()->z());
+        nb++;
+        he = he->next();
+    }while(he != m_halfEdge);
+
+    center /= nb;
+
+    return center;
 }
