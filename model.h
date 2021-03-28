@@ -82,6 +82,10 @@ public:
      */
     int indexSelectedFace() const;
 
+    /**
+     * @brief getter
+     * @return a pointer to the selected face, nullptr if no face is selected
+     */
     Face *selectedFace();
 
     /**
@@ -96,9 +100,15 @@ public:
      */
     int selectedEdge() const;
 
+private:
+
+    /**
+     * @brief add a face to the data
+     * @param f the face to add
+     * @param ID the face ID
+     */
     void addFace(Face *f, int ID);
 
-private:
     /**
      * @brief add a vertex, its normal and its ID to the data
      * @param v the vertex to add

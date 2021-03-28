@@ -45,6 +45,10 @@ public:
      */
     QVector3D computeNormal();
 
+    /**
+     * @brief compute the center of the face
+     * @return the center of the face
+     */
     QVector3D getCenter();
 
 private:

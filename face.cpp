@@ -47,6 +47,7 @@ QVector3D Face::computeNormal()
 
 QVector3D Face::getCenter()
 {
+    //compute the average position of all vertex of this face
     QVector3D center(0,0,0);
     float nb = 0;
     HalfEdge *he = m_halfEdge;

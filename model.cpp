@@ -152,7 +152,9 @@ int Model::findNbOfEdges() const
 void Model::setMesh(Mesh *mesh)
 {
     m_mesh = mesh;
+    //reset the selected face and edge
     setSelected(-1);
+    setEdgeSelected(-1);
     updateData();
 }
 

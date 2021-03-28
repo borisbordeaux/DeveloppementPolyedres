@@ -1,6 +1,7 @@
 #ifndef SHADERS_H
 #define SHADERS_H
 
+//vertex shader for faces
 static const char *vertexShaderSource =
         //"#version 320 es\n"
         "#version 330 core\n"
@@ -23,6 +24,7 @@ static const char *vertexShaderSource =
         "   gl_Position = projMatrix * mvMatrix * vertex;\n"
         "}\n";
 
+//fragment shader for faces
 static const char *fragmentShaderSource =
         //"#version 320 es\n"
         "#version 330 core\n"
@@ -59,6 +61,7 @@ static const char *fragmentShaderSource =
         "   }\n"
         "}\n";
 
+//vertex shaders for edges
 static const char *vertexShaderSourceEdge =
         //"#version 320 es\n"
         "#version 330 core\n"
@@ -108,6 +111,7 @@ static const char *vertexShaderSourceEdge =
         "       gl_Position = projMatrix * mvMatrix * vertex;\n"
         "}\n";
 
+//fragment shader for edges
 static const char *fragmentShaderSourceEdge =
         //"#version 320 es\n"
         "#version 330 core\n"

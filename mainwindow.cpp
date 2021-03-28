@@ -14,17 +14,20 @@ MainWindow::MainWindow(QWidget *parent)
       m_netControler(&m_net),
       m_netView(&m_net, &m_netControler),
       m_angleSetting(1, 89, &m_netControler, &m_net, &m_netView, ANGLE),
-      m_distanceSetting(1, 100, &m_netControler, &m_net, &m_netView, DISTANCE),
+      m_distanceSetting(1, 100, &m_netControler, &m_net, &m_netView, LENGTH),
       m_translationSetting(1, 10, &m_netControler, &m_net, &m_netView, TRANSLATION)
 {
+    //setup design
     ui->setupUi(this);
+    this->setWindowTitle("Polyhedron Development");
 
-    this->setWindowTitle("Développement de Polyèdres");
-
+    //connect signal and slot for animation using a qtimer
     connect(&m_timerAnimation, SIGNAL(timeout()), this, SLOT(animateOpenning()));
 
     //default mesh : a cube
     QString file = ":/obj_files/obj_files/cube.obj";
+
+    //openmesh used and not openfile because OpenGL functions have not been yet initialized
     openMesh(file);
 
     //add the net view
@@ -47,28 +50,39 @@ MainWindow::~MainWindow()
 
 void MainWindow::openMesh(QString &path)
 {
+    //reset meshes
     m_polyhedronMesh.reset();
     m_netMesh.reset();
+
+    //reset viewface and selected face
     m_netView.setViewFace(nullptr);
     m_net.setSelected(-1);
 
+    //read the obj file
     OBJReader::readOBJ(path, &m_polyhedronMesh);
 
+    //create the net
     m_netControler.createNet(m_polyhedronMesh, m_netMesh);
-    m_netControler.updateRootFace();
 
+    //set net mesh to the model
     m_net.setMesh(&m_netMesh);
 }
 
 void MainWindow::openFile(QString &path)
 {
+    //reset slider position
     m_sliderOpening->setValue(0);
+
+    //open mesh
     openMesh(path);
+
+    //indicates the data has changed to allocate memory to GPU
     m_netView.meshChanged();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
+    //close the window when Q is released
     switch (event->key()) {
     case Qt::Key_Q:
         close();
@@ -78,6 +92,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    //close all setting windows when main window is closed
     m_angleSetting.close();
     m_distanceSetting.close();
     m_translationSetting.close();
@@ -85,8 +100,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::sliderOpening()
 {
+    //get the percent of opening
     int oldPercent = m_netControler.getPercentOpening();
-    qDebug() << oldPercent;
 
     //we open the net at the angle that is the difference
     //between the slider position (new state of opening)
@@ -101,6 +116,8 @@ void MainWindow::sliderOpening()
         //we update the data of the model
         m_net.updateData();
 
+        //if the mesh is opened at 100, we need to reallocate the data
+        //because tabs are added
         if(m_netControler.getPercentOpening() == 100 || oldPercent == 100)
             m_netView.meshChanged();
 
@@ -147,25 +164,32 @@ void MainWindow::on_actionDiamond_triggered()
 
 void MainWindow::on_actionAnimate_triggered()
 {
+    //if the animation is active, it stops it
     if(m_timerAnimation.isActive())
     {
         m_timerAnimation.stop();
         ui->actionAnimate->setText("Animate");
+
+        //set possibility to move the slider
         m_sliderOpening->setDisabled(false);
     }
     else
     {
+        //otherwise it starts it
         m_timerAnimation.start();
         ui->actionAnimate->setText("Stop");
+
+        //disable the slider during animation
         m_sliderOpening->setDisabled(true);
     }
 }
 
 void MainWindow::animateOpenning()
 {
+    //get old position
     int oldPosition = m_sliderOpening->sliderPosition();
 
-    //then we open it at the right angle
+    //move the slider
     m_sliderOpening->setValue(m_sliderOpening->sliderPosition() + (m_isOpenning ? 1 : -1));
     //we update if we are opening or closing the net
     if(m_sliderOpening->value() == 100)
@@ -173,7 +197,10 @@ void MainWindow::animateOpenning()
     if(m_sliderOpening->value() == 0)
         m_isOpenning = true;
 
+    //then we open the mesh at the right angle
     m_netControler.open(m_sliderOpening->value() - oldPosition);
+
+    //we update the data and view
     m_net.updateData();
     m_netView.update();
 }
@@ -199,14 +226,14 @@ void MainWindow::on_actionSet_selected_Face_as_root_triggered()
     m_netControler.updateRootFace();
     //we open the net at the same angle
     m_netControler.open(m_sliderOpening->value());
-    //we update the view
+    //we update the data and the view
     m_net.updateData();
-
     m_netView.update();
 }
 
 void MainWindow::on_actionFaces_triggered(bool checked)
 {
+    //set selection mode to select faces
     if(checked)
     {
         m_netView.setSelectionMode(FACES);
@@ -218,6 +245,7 @@ void MainWindow::on_actionFaces_triggered(bool checked)
 
 void MainWindow::on_actionEdges_triggered(bool checked)
 {
+    //set selection mode to select edges
     if(checked)
     {
         m_netView.setSelectionMode(EDGES);
@@ -229,15 +257,17 @@ void MainWindow::on_actionEdges_triggered(bool checked)
 
 void MainWindow::on_actionSet_selected_Face_as_parent_triggered()
 {
+    //set selected face as local root
     if(m_net.selectedFace() != nullptr)
     {
-        m_netControler.setFaceAsParent(m_net.selectedFace());
+        m_netControler.setFaceAsLocalRoot(m_net.selectedFace());
         m_netView.update();
     }
 }
 
 void MainWindow::on_actionTranslate_selected_Face_triggered()
 {
+    //translate the selected face (if one is selected)
     if(m_net.selectedFace() != nullptr)
     {
         m_netControler.translateFace(m_net.selectedFace());
@@ -259,6 +289,7 @@ void MainWindow::on_actionExport_PNG_triggered()
     //cancel if no path were chosen
     if(path.compare("") != 0)
     {
+        //export the image
         path = QDir::toNativeSeparators(path);
         m_netView.setExportNet(path);
         m_netView.update();
@@ -267,13 +298,17 @@ void MainWindow::on_actionExport_PNG_triggered()
 
 void MainWindow::on_actionNomal_View_triggered()
 {
+    //remove the view face
     m_netView.setViewFace(nullptr);
     m_netView.update();
 }
 
 void MainWindow::on_actionDisplay_Tabs_triggered(bool checked)
 {
+    //displays tab or not depending on checked value
     m_netControler.setDisplayTabs(checked);
+
+    //update data, memory allocation to GPU and view
     m_net.updateData();
     m_netView.meshChanged();
     m_netView.update();
@@ -281,15 +316,18 @@ void MainWindow::on_actionDisplay_Tabs_triggered(bool checked)
 
 void MainWindow::on_actionTab_Angle_triggered()
 {
+    //show setting window for tab angle
     m_angleSetting.show();
 }
 
 void MainWindow::on_actionTab_Distance_triggered()
 {
+    //show setting window for tab distance
     m_distanceSetting.show();
 }
 
 void MainWindow::on_actionTranslation_Distance_triggered()
 {
+    //show setting window for translation setting
     m_translationSetting.show();
 }

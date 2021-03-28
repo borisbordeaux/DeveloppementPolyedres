@@ -7,12 +7,14 @@ SettingSlider::SettingSlider(int min, int max, NetControler *netControler, Model
     m_model(model),
     m_view(view)
 {
+    //set bound values
     setMinimum(min);
     setMaximum(max);
 
+    //set right title and values depending on the setting type
     QString title;
     switch (m_setting) {
-    case DISTANCE:
+    case LENGTH:
         title = "Distance : 15";
         setValue(15);
         break;
@@ -31,30 +33,30 @@ SettingSlider::SettingSlider(int min, int max, NetControler *netControler, Model
 
 void SettingSlider::changeValue(int value)
 {
+    //the new window title
+    QString title;
+
+    //apply setting depending on the setting types
     switch (m_setting) {
-    case DISTANCE:
-        m_netControler->setTabDist(float(value)/100.0f);
+    case LENGTH:
+        m_netControler->setTabLength(float(value)/100.0f);
+        title = "Distance : ";
         break;
     case ANGLE:
         m_netControler->setTabAngle(value);
+        title = "Angle : ";
         break;
     case TRANSLATION:
         m_netControler->setTranslationValue(value);
+        title = "Translation : ";
+        break;
     }
+
+    //update data and view
     m_model->updateData();
     m_view->meshChanged();
     m_view->update();
 
-    QString title;
-    switch (m_setting) {
-    case DISTANCE:
-        title = "Distance : ";
-        break;
-    case ANGLE:
-        title = "Angle : ";
-        break;
-    case TRANSLATION:
-        title = "Translation : ";
-    }
+    //update the title
     setWindowTitle(title + QString::number(value));
 }

@@ -11,6 +11,7 @@
 #include "model.h"
 #include "netcontroler.h"
 
+//to switch between face selection of edges selection
 enum SelectionMode
 {
     FACES, EDGES
@@ -66,9 +67,16 @@ public:
      */
     void meshChanged();
 
+    /**
+     * @brief set a face that has to be viewed by the camera
+     * @param f the face to see
+     */
     void setViewFace(Face *f);
-    Face* getViewFace();
 
+    /**
+     * @brief indicates that an image has to be exported
+     * @param path the path to the exported image
+     */
     void setExportNet(QString path);
 
 protected:
@@ -83,12 +91,14 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-
 private:
-
+    //compute matrices for the rendering
     void computeMVMatrices();
+    //manage face selection
     void clickFaceManagement();
+    //manage edge selection
     void clickEdgeManagement();
+    //manage exportation
     void exportNet();
 
     //the controler for modification of the model
@@ -117,11 +127,11 @@ private:
     int m_lightPosLoc = 0;
     int m_cameraPosLoc = 0;
     int m_modelMatrixLoc = 0;
+    int m_isPickingLoc = 0;
 
+    //for edges
     int m_projMatrixLocEdge = 0;
     int m_mvMatrixLocEdge = 0;
-
-    int m_isPickingLoc = 0;
     int m_isPickingLocEdge = 0;
 
     //matrices for rendering
@@ -129,6 +139,7 @@ private:
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
 
+    //camera position
     QVector3D m_cameraPos;
     QVector3D m_cameraLookAt;
     float m_cameraDistance = 7.0;
@@ -140,11 +151,15 @@ private:
     bool m_clicked = false;
     QPoint m_clickPos;
 
+    //used for selection
     SelectionMode m_selectionMode = FACES;
 
+    //the face the camera has to look
     Face *m_viewFace = nullptr;
 
+    //indicates that an exportation has to be done
     bool m_exportNet = false;
+    //path to the image exported
     QString m_exportPath;
 };
 
