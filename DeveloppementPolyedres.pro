@@ -27,9 +27,11 @@ SOURCES += \
     model.cpp \
     netcontroler.cpp \
     objreader.cpp \
+    settingslider.cpp \
     vertex.cpp
 
 HEADERS += \
+    settingslider.h \
     shaders.h \
     face.h \
     glview.h \

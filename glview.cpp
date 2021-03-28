@@ -163,7 +163,7 @@ void GLView::initializeGL()
     m_mvMatrixLoc = m_program->uniformLocation("mvMatrix");
     m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
     m_lightPosLoc = m_program->uniformLocation("lightPos");
-    m_cameraPosLoc = m_program->uniformLocation("cameraPos");
+    m_cameraPosLoc = m_program->uniformLocation("cameraPosition");
     m_modelMatrixLoc = m_program->uniformLocation("model");
     m_isPickingLoc = m_program->uniformLocation("isPicking");
 
@@ -188,11 +188,7 @@ void GLView::initializeGL()
     //memory allocation
     meshChanged();
 
-    //create camera
-    m_camera.setToIdentity();
-    m_camera.lookAt(QVector3D(0.0f,0.0f,m_cameraZ), QVector3D(0.0f,0.0f,0.0f), QVector3D(0.0f,1.0f,0.0f));
-
-    //set light position (behind the camera)
+    //set light position
     m_program->bind();
     m_program->setUniformValue(m_lightPosLoc, QVector3D(0.0f, 0.0f, 100.0f));
     m_program->release();
@@ -213,8 +209,9 @@ void GLView::paintGL()
     m_vboEdge.write(0, m_model->constDataEdge(), m_model->countEdge() * sizeof(GLfloat));
     m_vboEdge.release();
 
-    //set right orientation of the world
-    computeWorldMatrix();
+
+    computeMVMatrices();
+
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
 
     //set uniforms
@@ -222,7 +219,7 @@ void GLView::paintGL()
     m_program->setUniformValue(m_projMatrixLoc, m_proj);
     m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
-    m_program->setUniformValue(m_cameraPosLoc, m_cameraZ);
+    m_program->setUniformValue(m_cameraPosLoc, m_cameraPos);
     m_program->setUniformValue(m_modelMatrixLoc, m_world);
 
     if(m_exportNet)
@@ -252,10 +249,12 @@ void GLView::paintGL()
 
     //camera translate to set lines
     //in front of the polyhedron
-    m_camera.translate(0,0,0.002);
+    float transCam = m_cameraDistance/1000.0f > 0.001f ? m_cameraDistance/1000.0f : 0.001f;
+
+    m_camera.translate(transCam * (m_cameraPos-m_cameraLookAt).normalized());
     m_programEdge->setUniformValue(m_projMatrixLocEdge, m_proj);
     m_programEdge->setUniformValue(m_mvMatrixLocEdge, m_camera * m_world);
-    m_camera.translate(0,0,-0.002);
+    m_camera.translate(-transCam * (m_cameraPos-m_cameraLookAt).normalized());
 
     //glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_LINES, 0, m_model->vertexCountEdge());
@@ -299,9 +298,13 @@ void GLView::mouseMoveEvent(QMouseEvent *event)
 
 void GLView::wheelEvent(QWheelEvent *event)
 {
-    m_cameraZ -= (float)event->angleDelta().y()/500.0f;
-    m_camera.translate(0.0f,0.0f, (float)event->angleDelta().y()/500.0f);
-    update();
+    float val = (float)event->angleDelta().y()/500.0f;
+    if(m_cameraDistance - val > 0.0f)
+    {
+        m_cameraDistance -= val;
+        m_camera.translate(0.0f,0.0f, (float)event->angleDelta().y()/500.0f);
+        update();
+    }
 }
 
 void GLView::mouseReleaseEvent(QMouseEvent *event)
@@ -313,54 +316,27 @@ void GLView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void GLView::computeWorldMatrix()
+void GLView::computeMVMatrices()
 {
     m_world.setToIdentity();
 
-    //rotation to get the face in front of the camera
-    //so its normal has to be (0,0,1)
-    QMatrix4x4 rotation;
     if(m_viewFace != nullptr)
     {
-        QMatrix4x4 rotationY;
-        QVector4D normal = m_viewFace->computeNormal().toVector4D();
-
-        qDebug() << Qt::endl << "normal" << normal;
-
-        if(abs(normal.x()) > 0.0001f)
-            rotationY.rotate(-qRadiansToDegrees(qAtan2(normal.x(),normal.z())), 0,1,0);
-
-        QMatrix4x4 rotationX;
-        QVector4D normal_transformed = rotationY * normal;
-
-        qDebug() << "normal transformed Y" << normal_transformed;
-
-        if(abs(normal_transformed.y()) > 0.0001f)
-            rotationX.rotate(qRadiansToDegrees(qAtan2(normal_transformed.y(),normal_transformed.z())), 1,0,0);
-
-        normal_transformed = rotationX * normal_transformed;
-
-        qDebug() << "normal transformed X" << normal_transformed;
-
-        QMatrix4x4 rotationY2;
-        if(normal_transformed.z() < -0.0001)
-            rotationY2.rotate(180,0,1,0);
-
-        normal_transformed = rotationY2 * normal_transformed;
-
-        qDebug() << "normal transformed" << normal_transformed;
-
-        QMatrix4x4 translation;
-        QVector4D center_transformed = rotationY2 * rotationX * rotationY * m_viewFace->getCenter().toVector4D();
-        translation.translate(-center_transformed.x(), -center_transformed.y(), -center_transformed.z());
-
-        rotation = translation * rotationY2 * rotationX * rotationY * rotation;
+        m_camera.setToIdentity();
+        m_cameraPos = m_viewFace->getCenter()+m_viewFace->computeNormal()*m_cameraDistance;
+        m_cameraLookAt = m_viewFace->getCenter();
+        m_camera.lookAt(m_cameraPos, m_cameraLookAt, QVector3D(0.0f,1.0f,0.0f));
     }else{
-        rotation.rotate(m_xRot / 2.0f, 1, 0, 0);
-        rotation.rotate(m_yRot / 2.0f, 0, 1, 0);
-        rotation.rotate(m_zRot / 2.0f, 0, 0, 1);
+        m_camera.setToIdentity();
+        m_cameraPos = QVector3D(0.0f,0.0f,m_cameraDistance);
+        m_cameraLookAt = QVector3D(0.0f,0.0f,0.0f);
+        m_camera.lookAt(m_cameraPos, m_cameraLookAt, QVector3D(0.0f,1.0f,0.0f));
+
+        //set right orientation of the world
+        m_world.rotate(m_xRot / 2.0f, 1, 0, 0);
+        m_world.rotate(m_yRot / 2.0f, 0, 1, 0);
+        m_world.rotate(m_zRot / 2.0f, 0, 0, 1);
     }
-    m_world = rotation * m_world;
 }
 
 void GLView::clickFaceManagement()
@@ -372,7 +348,9 @@ void GLView::clickFaceManagement()
     m_program->bind();
     m_program->setUniformValue(m_isPickingLoc, true);
     glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
-    QColor color = grabFramebuffer().pixelColor(m_lastPos.x(), m_lastPos.y());
+    QImage image = grabFramebuffer();
+    QColor color = image.pixelColor(m_lastPos.x(), m_lastPos.y());
+    //image.save("test.png");
 
     m_model->setSelected(color.red());
     m_model->updateData();
@@ -400,6 +378,7 @@ void GLView::clickEdgeManagement()
 
     glDrawArrays(GL_LINES, 0, m_model->vertexCountEdge());
     QImage image = grabFramebuffer();
+    //image.save("test.png");
 
     int r = 0;
     int g = 0;
@@ -437,7 +416,37 @@ void GLView::exportNet()
     m_programEdge->setUniformValue(m_projMatrixLocEdge, m_proj);
     m_programEdge->setUniformValue(m_mvMatrixLocEdge, m_camera * m_world);
 
+    float w = this->size().width();
+    float h = this->size().height();
+    float right;
+    float left;
+    float top;
+    float bottom;
+    float aratio = w/h;
+    float scale = m_cameraDistance * qAtan(qDegreesToRadians(45.0f));
+
+    if (w > h)
+    {
+        scale /= aratio;
+        top = scale;
+        bottom = -top;
+        right = top * aratio;
+        left = -right;
+    }else{
+        scale *= aratio;
+        right = scale;
+        left = -right;
+        top = right / aratio;
+        bottom = -top;
+    }
+    QMatrix4x4 orthoProj;
+    orthoProj.ortho(left, right, bottom, top, -1000.0f, 1000.0f);
+    //m_programEdge->setUniformValue(m_projMatrixLocEdge, orthoProj);
+
     glDrawArrays(GL_LINES, 0, m_model->vertexCountEdge());
+
+    m_programEdge->setUniformValue(m_projMatrixLocEdge, m_proj);
+
     QImage image = grabFramebuffer();
 
     image.save(m_exportPath);

@@ -5,6 +5,7 @@
 #include <QSlider>
 #include "glview.h"
 #include "netcontroler.h"
+#include "settingslider.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,6 +29,7 @@ public:
     // QWidget interface
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void sliderOpening();
@@ -62,16 +64,6 @@ private slots:
 
     void on_actionTranslate_selected_Face_triggered();
 
-    void on_action1_triggered();
-
-    void on_action2_triggered();
-
-    void on_action3_triggered();
-
-    void on_action4_triggered();
-
-    void on_action5_triggered();
-
     void on_actionView_Selected_Face_triggered();
 
     void on_actionExport_PNG_triggered();
@@ -79,6 +71,12 @@ private slots:
     void on_actionNomal_View_triggered();
 
     void on_actionDisplay_Tabs_triggered(bool checked);
+
+    void on_actionTab_Angle_triggered();
+
+    void on_actionTab_Distance_triggered();
+
+    void on_actionTranslation_Distance_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -102,6 +100,9 @@ private:
     QTimer m_timerAnimation;
     bool m_isOpenning = true;
 
-    int m_translationValue = 1;
+    SettingSlider m_angleSetting;
+    SettingSlider m_distanceSetting;
+    SettingSlider m_translationSetting;
+
 };
 #endif // MAINWINDOW_H

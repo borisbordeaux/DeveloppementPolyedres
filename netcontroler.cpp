@@ -132,7 +132,7 @@ void NetControler::updateRootFace()
         createTree();
 }
 
-void NetControler::translateFace(Face *f, float range)
+void NetControler::translateFace(Face *f)
 {
     //it is possible only if it's not the root face
     if(f != m_rootFace && f->name().compare("tab") != 0)
@@ -161,12 +161,12 @@ void NetControler::translateFace(Face *f, float range)
 
         //we create the translation for the opening
         QMatrix4x4 translationOpening;
-        translationOpening.translate(range*dir.x(), range*dir.y(), range*dir.z());
+        translationOpening.translate(m_translationValue*dir.x(), m_translationValue*dir.y(), m_translationValue*dir.z());
         m_translationFaceOpening[f] = translationOpening;
 
         //and for the closing
         QMatrix4x4 translationClosing;
-        translationClosing.translate(-range*dir.x(), -range*dir.y(), -range*dir.z());
+        translationClosing.translate(-m_translationValue*dir.x(), -m_translationValue*dir.y(), -m_translationValue*dir.z());
         m_translationFaceClosing[f] = translationClosing;
 
         open(oldOpen);
@@ -280,7 +280,7 @@ QMatrix4x4 NetControler::transform(Face *f, int percent, QMatrix4x4 parentTransf
 
     if(m_percentOpening == 100 && m_translationFaceOpening.contains(f))
         transformation = m_translationFaceOpening[f] * parentTransform * transformation;
-    else if(m_wasFullyOpened && m_translationFaceOpening.contains(f))
+    else if(m_wasFullyOpened && m_translationFaceClosing.contains(f))
         transformation = parentTransform * m_translationFaceClosing[f] * transformation;
     else
         transformation = parentTransform * transformation;
@@ -439,6 +439,40 @@ void NetControler::setDisplayTabs(bool display)
     }else
         removeTabs();
     m_displayTabs = display;
+}
+
+void NetControler::setTabAngle(float angle)
+{
+    if(angle > 0 && angle < 90)
+    {
+        int old = m_percentOpening;
+        if(old == 100)
+            open(-1);
+        m_tabAngle = angle;
+        if(old == 100)
+            open(1);
+    }
+}
+
+void NetControler::setTabDist(float dist)
+{
+    if(dist > 0)
+    {
+        int old = m_percentOpening;
+        if(old == 100)
+            open(-1);
+        m_tabDist = dist;
+        if(old == 100)
+            open(1);
+    }
+}
+
+void NetControler::setTranslationValue(float value)
+{
+    if(value > 0)
+    {
+        m_translationValue = value;
+    }
 }
 
 void NetControler::removeTabs()

@@ -12,9 +12,15 @@ MainWindow::MainWindow(QWidget *parent)
       m_netMesh(),
       m_net(),
       m_netControler(&m_net),
-      m_netView(&m_net, &m_netControler)
+      m_netView(&m_net, &m_netControler),
+      m_angleSetting(1, 89, &m_netControler, &m_net, &m_netView, ANGLE),
+      m_distanceSetting(1, 100, &m_netControler, &m_net, &m_netView, DISTANCE),
+      m_translationSetting(1, 10, &m_netControler, &m_net, &m_netView, TRANSLATION)
 {
     ui->setupUi(this);
+
+    this->setWindowTitle("Développement de Polyèdres");
+
     connect(&m_timerAnimation, SIGNAL(timeout()), this, SLOT(animateOpenning()));
 
     //default mesh : a cube
@@ -70,9 +76,17 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    m_angleSetting.close();
+    m_distanceSetting.close();
+    m_translationSetting.close();
+}
+
 void MainWindow::sliderOpening()
 {
     int oldPercent = m_netControler.getPercentOpening();
+    qDebug() << oldPercent;
 
     //we open the net at the angle that is the difference
     //between the slider position (new state of opening)
@@ -226,70 +240,10 @@ void MainWindow::on_actionTranslate_selected_Face_triggered()
 {
     if(m_net.selectedFace() != nullptr)
     {
-        m_netControler.translateFace(m_net.selectedFace(), m_translationValue);
+        m_netControler.translateFace(m_net.selectedFace());
         m_netView.meshChanged();
         m_netView.update();
     }
-}
-
-void MainWindow::on_action1_triggered()
-{
-    //we change the translation value
-    m_translationValue = 1;
-
-    ui->action1->setChecked(true);
-    ui->action2->setChecked(false);
-    ui->action3->setChecked(false);
-    ui->action4->setChecked(false);
-    ui->action5->setChecked(false);
-}
-
-void MainWindow::on_action2_triggered()
-{
-    //we change the translation value
-    m_translationValue = 2;
-
-    ui->action1->setChecked(false);
-    ui->action2->setChecked(true);
-    ui->action3->setChecked(false);
-    ui->action4->setChecked(false);
-    ui->action5->setChecked(false);
-}
-
-void MainWindow::on_action3_triggered()
-{
-    //we change the translation value
-    m_translationValue = 3;
-
-    ui->action1->setChecked(false);
-    ui->action2->setChecked(false);
-    ui->action3->setChecked(true);
-    ui->action4->setChecked(false);
-    ui->action5->setChecked(false);
-}
-
-void MainWindow::on_action4_triggered()
-{
-    //we change the translation value
-    m_translationValue = 4;
-
-    ui->action1->setChecked(false);
-    ui->action2->setChecked(false);
-    ui->action3->setChecked(false);
-    ui->action4->setChecked(true);
-    ui->action5->setChecked(false);
-}
-
-void MainWindow::on_action5_triggered()
-{
-    //we change the translation value
-    m_translationValue = 5;
-
-    ui->action1->setChecked(false);
-    ui->action2->setChecked(false);
-    ui->action3->setChecked(false);
-    ui->action4->setChecked(false);
-    ui->action5->setChecked(true);
 }
 
 void MainWindow::on_actionView_Selected_Face_triggered()
@@ -323,4 +277,19 @@ void MainWindow::on_actionDisplay_Tabs_triggered(bool checked)
     m_net.updateData();
     m_netView.meshChanged();
     m_netView.update();
+}
+
+void MainWindow::on_actionTab_Angle_triggered()
+{
+    m_angleSetting.show();
+}
+
+void MainWindow::on_actionTab_Distance_triggered()
+{
+    m_distanceSetting.show();
+}
+
+void MainWindow::on_actionTranslation_Distance_triggered()
+{
+    m_translationSetting.show();
 }

@@ -17,7 +17,7 @@ public:
 
     void updateRootFace();
 
-    void translateFace(Face *f, float range);
+    void translateFace(Face *f);
 
     void setFaceAsParent(Face *f);
 
@@ -27,6 +27,12 @@ public:
     void createTabs();
 
     void setDisplayTabs(bool display);
+
+    void setTabAngle(float angle);
+
+    void setTabDist(float dist);
+
+    void setTranslationValue(float value);
 
 private:
     void automaticallyAddTabs();
@@ -53,6 +59,7 @@ private:
     QMap<Face*, Face*> m_parent;
     QMap<Face*, QMatrix4x4> m_translationFaceOpening;
     QMap<Face*, QMatrix4x4> m_translationFaceClosing;
+    float m_translationValue = 1.0f;
 
     Face *m_rootFace;
     Mesh *m_net;

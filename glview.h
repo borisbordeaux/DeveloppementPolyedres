@@ -86,7 +86,7 @@ protected:
 
 private:
 
-    void computeWorldMatrix();
+    void computeMVMatrices();
     void clickFaceManagement();
     void clickEdgeManagement();
     void exportNet();
@@ -129,7 +129,9 @@ private:
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
 
-    float m_cameraZ = 7.0;
+    QVector3D m_cameraPos;
+    QVector3D m_cameraLookAt;
+    float m_cameraDistance = 7.0;
 
     //the model that will be displayed
     Model *m_model;
