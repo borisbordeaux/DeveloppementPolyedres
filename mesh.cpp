@@ -1,111 +1,122 @@
 #include "mesh.h"
 
+#include "face.h"
+#include "halfedge.h"
+#include "vertex.h"
+
 Mesh::Mesh()
 {
 }
 
 Mesh::~Mesh()
 {
-    reset();
+	reset();
 }
 
-QVector<Vertex *> Mesh::vertices() const
+QVector<Vertex*> Mesh::vertices() const
 {
-    return m_vertices;
+	return m_vertices;
 }
 
-QVector<HalfEdge *> Mesh::halfEdges() const
+QVector<HalfEdge*> Mesh::halfEdges() const
 {
-    return m_halfEdges;
+	return m_halfEdges;
 }
 
-QVector<Face *> Mesh::faces() const
+QVector<Face*> Mesh::faces() const
 {
-    return m_faces;
+	return m_faces;
 }
 
-void Mesh::append(Vertex *v)
+void Mesh::append(Vertex* v)
 {
-    m_vertices.append(v);
+	m_vertices.append(v);
 }
 
-void Mesh::append(HalfEdge *he)
+void Mesh::append(HalfEdge* he)
 {
-    //append an halfedge to the mesh
-    m_halfEdges.append(he);
-    //and to the map to enhance the finding
-    m_map[he->name()] = m_halfEdges.size()-1;
+	//append an halfedge to the mesh
+	m_halfEdges.append(he);
+	//and to the map to enhance the finding
+	m_map[he->name()] = m_halfEdges.size() - 1;
 }
 
-void Mesh::append(Face *f)
+void Mesh::append(Face* f)
 {
-    m_faces.append(f);
+	m_faces.append(f);
 }
 
-void Mesh::remove(Vertex *v)
+void Mesh::remove(Vertex* v)
 {
-    int index = m_vertices.indexOf(v);
-    if(index >= 0)
-        m_vertices.remove(index);
+	int index = m_vertices.indexOf(v);
+
+	if (index >= 0)
+		m_vertices.remove(index);
 }
 
-void Mesh::remove(HalfEdge *he)
+void Mesh::remove(HalfEdge* he)
 {
-    int index = m_halfEdges.indexOf(he);
-    if(index >= 0)
-    {
-        m_halfEdges.remove(index);
-        m_map.remove(he->name());
-    }
+	int index = m_halfEdges.indexOf(he);
+
+	if (index >= 0)
+	{
+		m_halfEdges.remove(index);
+		m_map.remove(he->name());
+	}
 }
 
-void Mesh::remove(Face *f)
+void Mesh::remove(Face* f)
 {
-    int index = m_faces.indexOf(f);
-    if(index >= 0)
-        m_faces.remove(index);
+	int index = m_faces.indexOf(f);
+
+	if (index >= 0)
+		m_faces.remove(index);
 }
 
-HalfEdge *Mesh::findByName(const QString &name)
+HalfEdge* Mesh::findByName(const QString& name)
 {
-    HalfEdge *res = nullptr;
-    if (m_map.contains(name)){
-        res = m_halfEdges.at(m_map[name]);
-    }
-    return res;
+	HalfEdge* res = nullptr;
+
+	if (m_map.contains(name))
+		res = m_halfEdges.at(m_map[name]);
+
+	return res;
 }
 
 void Mesh::reset()
 {
-    //unallocate each face
-    for(Face *f : qAsConst(m_faces))
-        if(f != nullptr)
-        {
-            delete f;
-            f = nullptr;
-        }
-    //clear the vector
-    m_faces.clear();
+	//unallocate each face
+	for (Face* f : qAsConst(m_faces))
+		if (f != nullptr)
+		{
+			delete f;
+			f = nullptr;
+		}
 
-    //unallocate each vertex
-    for(Vertex *v : qAsConst(m_vertices))
-        if(v != nullptr)
-        {
-            delete v;
-            v = nullptr;
-        }
-    //clear the vector
-    m_vertices.clear();
+	//clear the vector
+	m_faces.clear();
 
-    //unallocate each halfedge
-    for(HalfEdge *he : qAsConst(m_halfEdges))
-        if(he != nullptr)
-        {
-            delete he;
-            he = nullptr;
-        }
-    //clear the vector
-    m_halfEdges.clear();
-    //clear the map
-    m_map.clear();
+	//unallocate each vertex
+	for (Vertex* v : qAsConst(m_vertices))
+		if (v != nullptr)
+		{
+			delete v;
+			v = nullptr;
+		}
+
+	//clear the vector
+	m_vertices.clear();
+
+	//unallocate each halfedge
+	for (HalfEdge* he : qAsConst(m_halfEdges))
+		if (he != nullptr)
+		{
+			delete he;
+			he = nullptr;
+		}
+
+	//clear the vector
+	m_halfEdges.clear();
+	//clear the map
+	m_map.clear();
 }
