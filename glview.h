@@ -144,7 +144,7 @@ private:
 	//camera position
 	QVector3D m_cameraPos;
 	QVector3D m_cameraLookAt;
-	float m_cameraDistance = 7.0;
+	float m_cameraDistance = 6.0;
 
 	//the model that will be displayed
 	Model* m_model;
@@ -152,6 +152,7 @@ private:
 	//useful for item selection
 	bool m_clicked = false;
 	QPoint m_clickPos;
+    QSize m_screenSize;
 
 	//used for selection
 	SelectionMode m_selectionMode = FACES;

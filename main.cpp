@@ -10,10 +10,12 @@ int main(int argc, char* argv[])
 	QSurfaceFormat fmt;
 	fmt.setDepthBufferSize(24);
 	//smoother display
+#ifndef Q_OS_ANDROID
 	fmt.setSamples(16);
+#endif
 	fmt.setVersion(3, 2);
 	fmt.setProfile(QSurfaceFormat::CoreProfile);
-	fmt.setSwapInterval(0);
+	fmt.setSwapInterval(1);
 	QSurfaceFormat::setDefaultFormat(fmt);
 
 	MainWindow w;

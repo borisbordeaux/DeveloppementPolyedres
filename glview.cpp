@@ -5,11 +5,18 @@
 #include <QtMath>
 #include <QtOpenGL/QOpenGLShaderProgram>
 #include <QWheelEvent>
+#include <QStandardPaths>
 
 #include "face.h"
 #include "model.h"
 #include "netcontroler.h"
 #include "shaders.h"
+
+#ifndef GL_MULTISAMPLE
+#ifdef Q_OS_ANDROID
+#define GL_MULTISAMPLE 0x809D
+#endif
+#endif
 
 GLView::GLView(Model* model, NetControler* netControler, QWidget* parent):
 	QOpenGLWidget(parent), m_netControler(netControler), m_model(model)
@@ -162,7 +169,6 @@ void GLView::initializeGL()
 	m_vao.bind();
 
 	//background
-	//glClearColor(0.4f, 0.8f, 0.1f, 1.0f);
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
 	//init shader for mesh
@@ -291,6 +297,7 @@ void GLView::resizeGL(int w, int h)
 	//reset the porjection with the new window size
 	m_proj.setToIdentity();
 	m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
+    m_screenSize = QSize(w,h);
 }
 
 
@@ -342,8 +349,10 @@ void GLView::wheelEvent(QWheelEvent* event)
 
 void GLView::mouseReleaseEvent(QMouseEvent* event)
 {
+    QVector2D v(event->pos() - m_clickPos);
+    
 	//if there was a click
-	if (event->pos() == m_clickPos)
+	if (v.length() < 5.0f)
 	{
 		//then will do the edge or face selection
 		m_clicked = true;
@@ -388,18 +397,24 @@ void GLView::clickFaceManagement()
 	//clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//indicates to the shader that we're going a selection
+	//indicates to the shader that we're doing a selection
 	m_program->bind();
 	m_program->setUniformValue(m_isPickingLoc, true);
 
 	//draw faces
 	glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
 
-	//render he scene
+	//render the scene
 	QImage image = grabFramebuffer();
-
-	//read the pixel under the mouse
-	QColor color = image.pixelColor(m_lastPos.x(), m_lastPos.y());
+    
+    //compute real click position on image based on screen size
+    //because on android, screen size is not pixel size
+    QSize imageSize = image.size();
+    QPoint clickPos((float)m_clickPos.x()/(float)m_screenSize.width()*imageSize.width(),
+                    (float)m_clickPos.y()/(float)m_screenSize.height()*imageSize.height());
+	
+    //read the pixel under the mouse
+	QColor color = image.pixelColor(clickPos.x(), clickPos.y());
 
 	//set the selected face using the red color
 	m_model->setSelected(color.red());
@@ -416,7 +431,6 @@ void GLView::clickFaceManagement()
 	m_program->setUniformValue(m_isPickingLoc, false);
 
 	//reset color
-	glClearColor(0.4f, 0.8f, 0.1f, 1.0f);
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
 	//enable multisample
@@ -445,6 +459,12 @@ void GLView::clickEdgeManagement()
 
 	//render the scene
 	QImage image = grabFramebuffer();
+    
+    //compute real click position on image based on screen size
+    //because on android, screen size is not pixel size
+    QSize imageSize = image.size();
+    QPoint clickPos((float)m_clickPos.x()/(float)m_screenSize.width()*imageSize.width(),
+                    (float)m_clickPos.y()/(float)m_screenSize.height()*imageSize.height());
 
 	//get the color by looking at an area of 10x10 pixels under the mouse
 	//get the higher color for each chanel
@@ -452,10 +472,10 @@ void GLView::clickEdgeManagement()
 	int g = 0;
 	int b = 0;
 
-	for (int i = -5; i < 5; i++)
-		for (int j = -5; j < 5; j++)
+	for (int i = -10; i < 10; i++)
+		for (int j = -10; j < 10; j++)
 		{
-			QColor c = image.pixelColor(m_lastPos.x() + i, m_lastPos.y() + j);
+			QColor c = image.pixelColor(clickPos.x() + i, clickPos.y() + j);
 
 			if (r < c.red())
 				r = c.red();
@@ -482,7 +502,7 @@ void GLView::clickEdgeManagement()
 	m_programEdge->setUniformValue(m_isPickingLocEdge, false);
 
 	//reset clear color
-	glClearColor(0.4f, 0.8f, 0.1f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
 	//enable multisample
 	glEnable(GL_MULTISAMPLE);
@@ -548,6 +568,5 @@ void GLView::exportNet()
 	m_programEdge->setUniformValue(m_projMatrixLocEdge, m_proj);
 
 	//reset the background color
-	glClearColor(0.4f, 0.8f, 0.1f, 1.0f);
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 }

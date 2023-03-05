@@ -86,9 +86,11 @@ void MainWindow::openFile(QString& path)
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
 	//close the window when Q is released
+    //or when back key on android is pressed
 	switch (event->key())
 	{
 		case Qt::Key_Q:
+		case Qt::Key_Back:
 			close();
 			break;
 	}
