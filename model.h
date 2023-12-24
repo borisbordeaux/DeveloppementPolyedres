@@ -4,8 +4,11 @@
 #include <QVector>
 #include <QVector3D>
 
-class Face;
-class Mesh;
+namespace he
+{
+	class Face;
+	class Mesh;
+}
 
 class Model
 {
@@ -69,7 +72,7 @@ public:
 	 * @param mesh the mesh to set to this model.
 	 * Calls updateData()
 	 */
-	void setMesh(Mesh* mesh);
+	void setMesh(he::Mesh* mesh);
 
 	/**
 	 * @brief set the selected face index
@@ -87,7 +90,7 @@ public:
 	 * @brief getter
 	 * @return a pointer to the selected face, nullptr if no face is selected
 	 */
-	Face* selectedFace();
+	he::Face* selectedFace();
 
 	/**
 	 * @brief setEdgeSelected
@@ -108,7 +111,7 @@ private:
 	 * @param f the face to add
 	 * @param ID the face ID
 	 */
-	void addFace(Face* f, int ID);
+	void addFace(he::Face* f, int ID);
 
 	/**
 	 * @brief add a vertex, its normal and its ID to the data
@@ -160,7 +163,7 @@ private:
 	int m_countEdge = 0;
 
 	//the mesh the model is based on
-	Mesh* m_mesh;
+	he::Mesh* m_mesh;
 
 	//the index of the selected face
 	int m_selectedFace = -1;

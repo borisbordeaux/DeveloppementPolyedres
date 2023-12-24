@@ -11,7 +11,11 @@
 class QOpenGLShaderProgram;
 class Model;
 class NetControler;
-class Face;
+
+namespace he
+{
+	class Face;
+}
 
 //to switch between face selection or edges selection
 enum SelectionMode
@@ -73,7 +77,7 @@ public:
 	 * @brief set a face that has to be viewed by the camera
 	 * @param f the face to see
 	 */
-	void setViewFace(Face* f);
+	void setViewFace(he::Face* f);
 
 	/**
 	 * @brief indicates that an image has to be exported
@@ -152,13 +156,13 @@ private:
 	//useful for item selection
 	bool m_clicked = false;
 	QPoint m_clickPos;
-    QSize m_screenSize;
+	QSize m_screenSize;
 
 	//used for selection
 	SelectionMode m_selectionMode = FACES;
 
 	//the face the camera has to look
-	Face* m_viewFace = nullptr;
+	he::Face* m_viewFace = nullptr;
 
 	//indicates that an exportation has to be done
 	bool m_exportNet = false;

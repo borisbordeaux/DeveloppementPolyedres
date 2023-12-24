@@ -3,7 +3,10 @@
 
 #include <QString>
 
-class Mesh;
+namespace he
+{
+	class Mesh;
+}
 
 class OBJReader
 {
@@ -14,7 +17,7 @@ public:
 	 * @param mesh the mesh that will be filled with the data
 	 * of the OBJ file given
 	 */
-	static void readOBJ(QString& filename, Mesh* mesh);
+	static void readOBJ(QString const& filename, he::Mesh& mesh);
 };
 
 #endif // OBJREADER_H

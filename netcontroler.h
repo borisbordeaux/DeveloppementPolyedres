@@ -3,11 +3,14 @@
 
 #include <QMatrix4x4>
 
-class Mesh;
+namespace he
+{
+	class Mesh;
+	class Face;
+	class HalfEdge;
+	class Vertex;
+}
 class Model;
-class Face;
-class HalfEdge;
-class Vertex;
 
 class NetControler
 {
@@ -24,7 +27,7 @@ public:
 	 * @param mesh the mesh the net will be based on
 	 * @param net the mesh of the net that will be filled
 	 */
-	void createNet(Mesh& mesh, Mesh& net);
+	void createNet(he::Mesh& mesh, he::Mesh& net);
 
 	/**
 	 * @brief open the net by a given percent
@@ -42,13 +45,13 @@ public:
 	 * @brief translate the given face
 	 * @param f the face to translate
 	 */
-	void translateFace(Face* f);
+	void translateFace(he::Face* f);
 
 	/**
 	 * @brief add a local root by setting the given face as parent to all adjacent faces of f
 	 * @param f the face that will be the local root
 	 */
-	void setFaceAsLocalRoot(Face* f);
+	void setFaceAsLocalRoot(he::Face* f);
 
 	/**
 	 * @brief getter
@@ -100,20 +103,20 @@ private:
 	 * @brief add the given halfedge to the list of halfedges that will have a tab
 	 * @param he the halfedge that will have a tab
 	 */
-	void addTabToHalfEdge(HalfEdge* he);
+	void addTabToHalfEdge(he::HalfEdge* he);
 
 	/**
 	 * @brief add a tab to the given halfedge
 	 * @param he the halfedge the tab is attached to
 	 */
-	void createTab(HalfEdge* he);
+	void createTab(he::HalfEdge* he);
 
 	/**
 	 * @brief add a local root by setting the given face as parent to all adjacent faces of f
 	 * @param f the face that will be the local root
 	 * @param rewriteParent has to be false for the creation of the net, but true for the modification
 	 */
-	void setFaceAsLocalRoot(Face* f, bool rewriteParent);
+	void setFaceAsLocalRoot(he::Face* f, bool rewriteParent);
 
 	/**
 	 * @brief find if there will be a loop if child face had parent face as parent
@@ -121,7 +124,7 @@ private:
 	 * @param parent the potential parent
 	 * @return true if there is a loop, false otherwise
 	 */
-	bool findLoop(Face* child, Face* parent) const;
+	bool findLoop(he::Face* child, he::Face* parent) const;
 
 	/**
 	 * @brief create a tree representing the faces and their links between themselves
@@ -136,7 +139,7 @@ private:
 	 * @param parentTransform the f's parent transformation
 	 * @return the transformation of the face
 	 */
-	QMatrix4x4 transform(Face* f, int percent, QMatrix4x4 parentTransform);
+	QMatrix4x4 transform(he::Face* f, int percent, QMatrix4x4 parentTransform);
 
 	/**
 	 * @brief compute the angle between 2 faces
@@ -145,7 +148,7 @@ private:
 	 * @param rotationAxis the rotation axis between the faces
 	 * @return the oriented angle of the faces
 	 */
-	float angleBetweenFaces(Face* f1, Face* f2, HalfEdge* rotationAxis);
+	float angleBetweenFaces(he::Face* f1, he::Face* f2, he::HalfEdge* rotationAxis);
 
 	/**
 	 * @brief simplify the net by merging all adjacent faces that has the same normal
@@ -158,7 +161,7 @@ private:
 	 * @param f2 the second face
 	 * @return true if the faces has the same normal, false otherwise
 	 */
-	bool haveSameNormal(Face* f1, Face* f2) const;
+	bool haveSameNormal(he::Face* f1, he::Face* f2) const;
 
 	/**
 	 * @brief merge faces by modifying f1 and deleting f2
@@ -166,31 +169,31 @@ private:
 	 * @param f2 the facethat will be merged to f1
 	 * @param he the common halfedge between f1 and f2
 	 */
-	void mergeFaces(Face* f1, Face* f2, HalfEdge* he);
+	void mergeFaces(he::Face* f1, he::Face* f2, he::HalfEdge* he);
 
 	//a map to get for each face their rotation axis
-	QMap<Face*, HalfEdge*> m_baseRotation;
+	QMap<he::Face*, he::HalfEdge*> m_baseRotation;
 
 	//a map to get for each face their default angle
-	QMap<Face*, float> m_angles;
+	QMap<he::Face*, float> m_angles;
 
 	//a map to get for each face their parent
-	QMap<Face*, Face*> m_parent;
+	QMap<he::Face*, he::Face*> m_parent;
 
 	//a map to get for each face their transformation for opening
-	QMap<Face*, QMatrix4x4> m_translationFaceOpening;
+	QMap<he::Face*, QMatrix4x4> m_translationFaceOpening;
 
 	//a map to get for each face their transformation for closing
-	QMap<Face*, QMatrix4x4> m_translationFaceClosing;
+	QMap<he::Face*, QMatrix4x4> m_translationFaceClosing;
 
 	//the translation value
 	float m_translationValue = 1.0f;
 
 	//the root face
-	Face* m_rootFace;
+	he::Face* m_rootFace;
 
 	//the net that will be manipulated
-	Mesh* m_net;
+	he::Mesh* m_net;
 
 	//the model of the net (to update data)
 	Model* m_model;
@@ -211,12 +214,12 @@ private:
 	float m_tabLength = 0.15f;
 
 	//list that will contain all halfedges that will have a tab
-	QVector<HalfEdge*> m_heWithTab;
+	QVector<he::HalfEdge*> m_heWithTab;
 
 	//data for all tabs, will be deleted if net is not opened at 100%
-	QVector<Face*> m_tabFaces;
-	QVector<HalfEdge*> m_tabHalfEdges;
-	QVector<Vertex*> m_tabVertices;
+	QVector<he::Face*> m_tabFaces;
+	QVector<he::HalfEdge*> m_tabHalfEdges;
+	QVector<he::Vertex*> m_tabVertices;
 };
 
 #endif // NETCONTROLER_H

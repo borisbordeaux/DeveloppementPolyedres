@@ -95,8 +95,8 @@ private:
 	QSlider* m_sliderOpening;
 
 	//the meshes of the polyhedron and its net
-	Mesh m_polyhedronMesh;
-	Mesh m_netMesh;
+	he::Mesh m_polyhedronMesh;
+	he::Mesh m_netMesh;
 
 	//the model of the net that read the
 	//mesh and send the data to the view

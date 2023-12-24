@@ -1,54 +1,102 @@
-#include "face.h"
+#include <vector>
+#include <QMatrix4x4>
 
+#include "face.h"
 #include "halfedge.h"
 #include "vertex.h"
 
-Face::Face(QString name, HalfEdge* halfEdge):
-	m_name(name), m_halfEdge(halfEdge)
-{
+he::Face::Face(QString name, he::HalfEdge* halfEdge) : m_name(std::move(name)), m_halfEdge(halfEdge) {}
 
-}
-
-HalfEdge* Face::halfEdge()
+he::HalfEdge* he::Face::halfEdge()
 {
 	return m_halfEdge;
 }
 
-void Face::setHalfEdge(HalfEdge* halfEdge)
+void he::Face::setHalfEdge(he::HalfEdge* halfEdge)
 {
 	m_halfEdge = halfEdge;
 }
 
-QString Face::name() const
+QString he::Face::name() const
 {
 	return m_name;
 }
 
-void Face::setName(const QString& name)
-{
-	m_name = name;
-}
-
-QVector3D Face::computeNormal()
+QVector3D he::Face::computeNormal()
 {
 	//take 3 points of the face
-	float x1 = this->halfEdge()->origin()->x();
-	float y1 = this->halfEdge()->origin()->y();
-	float z1 = this->halfEdge()->origin()->z();
-
-	float x2 = this->halfEdge()->next()->origin()->x();
-	float y2 = this->halfEdge()->next()->origin()->y();
-	float z2 = this->halfEdge()->next()->origin()->z();
-
-	float x3 = this->halfEdge()->next()->next()->origin()->x();
-	float y3 = this->halfEdge()->next()->next()->origin()->y();
-	float z3 = this->halfEdge()->next()->next()->origin()->z();
+	QVector3D p1 = this->halfEdge()->origin()->pos();
+	QVector3D p2 = this->halfEdge()->next()->origin()->pos();
+	QVector3D p3 = this->halfEdge()->next()->next()->origin()->pos();
 
 	//then compute the normal of the vectors created using the taken points
-	return QVector3D::normal(QVector3D(x2 - x1, y2 - y1, z2 - z1), QVector3D(x3 - x2, y3 - y2, z3 - z2));
+	return QVector3D::normal(p2 - p1, p3 - p2);
 }
 
-QVector3D Face::getCenter()
+std::size_t he::Face::nbEdges() const
+{
+	std::size_t res = 0;
+
+	he::HalfEdge* he = this->m_halfEdge;
+	he::HalfEdge* heNxt = he;
+
+	do
+	{
+		res++;
+		heNxt = heNxt->next();
+	}
+	while (heNxt != he);
+
+	return res;
+}
+
+std::vector<he::HalfEdge*> he::Face::allHalfEdges() const
+{
+	std::vector<he::HalfEdge*> res;
+
+	he::HalfEdge* he = this->m_halfEdge;
+	he::HalfEdge* heNxt = he;
+
+	do
+	{
+		res.push_back(heNxt);
+		heNxt = heNxt->next();
+	}
+	while (heNxt != he);
+
+	return res;
+}
+
+float he::Face::area()
+{
+	// compute the new basis
+	QVector3D axeX = (m_halfEdge->next()->origin()->pos() - m_halfEdge->origin()->pos()).normalized();
+	QVector3D axeZ = this->computeNormal();
+	QVector3D axeY = QVector3D::crossProduct(axeZ, axeX);
+
+	// row major order
+	QMatrix4x4 invTransMat = QMatrix4x4(axeX.x(), axeY.x(), axeZ.x(), 0,
+	                                    axeX.y(), axeY.y(), axeZ.y(), 0,
+	                                    axeX.z(), axeY.z(), axeZ.z(), 0,
+	                                    0, 0, 0, 1).inverted();
+
+	float res = 0.0f;
+	he::HalfEdge* he = this->m_halfEdge;
+	he::HalfEdge* heNxt = he;
+
+	do
+	{
+		QVector4D p1 = invTransMat * QVector4D(heNxt->origin()->pos(), 1.0f);
+		QVector4D p2 = invTransMat * QVector4D(heNxt->next()->origin()->pos(), 1.0f);
+		res += p1.x() * p2.y() - p2.x() * p1.y();
+		heNxt = heNxt->next();
+	}
+	while (heNxt != he);
+
+	return res / 2.0f;
+}
+
+QVector3D he::Face::getCenter()
 {
 	//compute the average position of all vertex of this face
 	QVector3D center(0, 0, 0);

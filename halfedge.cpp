@@ -1,72 +1,76 @@
 #include "halfedge.h"
-
 #include "face.h"
 #include "vertex.h"
 
-HalfEdge::HalfEdge(Vertex* origin, QString name):
+he::HalfEdge::HalfEdge(he::Vertex* origin, QString name) :
 	m_origin(origin), m_face(nullptr),
 	m_twin(nullptr), m_prev(nullptr),
-	m_next(nullptr), m_name(name)
+	m_next(nullptr), m_name(std::move(name))
 {
 
 }
 
-Vertex* HalfEdge::origin()
+he::Vertex* he::HalfEdge::origin()
 {
 	return m_origin;
 }
 
-void HalfEdge::setOrigin(Vertex* origin)
+void he::HalfEdge::setOrigin(he::Vertex* origin)
 {
 	m_origin = origin;
 }
 
-Face* HalfEdge::face()
+he::Face* he::HalfEdge::face()
 {
 	return m_face;
 }
 
-void HalfEdge::setFace(Face* face)
+void he::HalfEdge::setFace(he::Face* face)
 {
 	m_face = face;
 }
 
-HalfEdge* HalfEdge::twin()
+he::HalfEdge* he::HalfEdge::twin()
 {
 	return m_twin;
 }
 
-void HalfEdge::setTwin(HalfEdge* twin)
+void he::HalfEdge::setTwin(he::HalfEdge* twin)
 {
 	m_twin = twin;
 }
 
-HalfEdge* HalfEdge::prev()
+he::HalfEdge* he::HalfEdge::prev()
 {
 	return m_prev;
 }
 
-void HalfEdge::setPrev(HalfEdge* prev)
+void he::HalfEdge::setPrev(HalfEdge* prev)
 {
 	m_prev = prev;
 }
 
-HalfEdge* HalfEdge::next()
+he::HalfEdge* he::HalfEdge::next()
 {
 	return m_next;
 }
 
-void HalfEdge::setNext(HalfEdge* next)
+void he::HalfEdge::setNext(he::HalfEdge* next)
 {
 	m_next = next;
 }
 
-QString HalfEdge::name() const
+QString he::HalfEdge::name() const
 {
 	return m_name;
 }
 
-void HalfEdge::setName(const QString& name)
+void he::HalfEdge::setName(QString const& name)
 {
 	m_name = name;
+}
+
+float he::HalfEdge::length() const
+{
+	return (m_next->origin()->pos() - m_origin->pos()).length();
 }

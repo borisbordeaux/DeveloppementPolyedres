@@ -4,119 +4,156 @@
 #include "halfedge.h"
 #include "vertex.h"
 
-Mesh::Mesh()
-{
-}
-
-Mesh::~Mesh()
+he::Mesh::~Mesh()
 {
 	reset();
 }
 
-QVector<Vertex*> Mesh::vertices() const
+std::vector<he::Vertex*> const& he::Mesh::vertices() const
 {
 	return m_vertices;
 }
 
-QVector<HalfEdge*> Mesh::halfEdges() const
+std::vector<he::HalfEdge*> const& he::Mesh::halfEdges() const
 {
 	return m_halfEdges;
 }
 
-QVector<Face*> Mesh::faces() const
+std::vector<he::HalfEdge*> const& he::Mesh::halfEdgesNoTwin() const
+{
+	return m_halfEdgesNotTwin;
+}
+
+std::vector<he::Face*> const& he::Mesh::faces() const
 {
 	return m_faces;
 }
 
-void Mesh::append(Vertex* v)
+void he::Mesh::append(he::Vertex* v)
 {
-	m_vertices.append(v);
+	m_vertices.push_back(v);
 }
 
-void Mesh::append(HalfEdge* he)
+void he::Mesh::append(he::HalfEdge* he, bool completeNotTwin)
 {
-	//append an halfedge to the mesh
-	m_halfEdges.append(he);
-	//and to the map to enhance the finding
-	m_map[he->name()] = m_halfEdges.size() - 1;
+	//append a half-edge to the mesh
+	m_halfEdges.push_back(he);
+
+	if (completeNotTwin)
+		m_halfEdgesNotTwin.push_back(he);
 }
 
-void Mesh::append(Face* f)
+void he::Mesh::append(Face* f)
 {
-	m_faces.append(f);
+	m_faces.push_back(f);
 }
 
-void Mesh::remove(Vertex* v)
+he::HalfEdge* he::Mesh::findByName(const QString& name)
 {
-	int index = m_vertices.indexOf(v);
+	he::HalfEdge* res = nullptr;
 
-	if (index >= 0)
-		m_vertices.remove(index);
-}
+	int i = name.split(" ")[0].toInt() - 1;
+	he::Vertex* v = m_vertices[i];
 
-void Mesh::remove(HalfEdge* he)
-{
-	int index = m_halfEdges.indexOf(he);
+	if (v->halfEdge() != nullptr && v->halfEdge()->name() == name)
+		res = v->halfEdge();
 
-	if (index >= 0)
+	else
 	{
-		m_halfEdges.remove(index);
-		m_map.remove(he->name());
+		for (he::HalfEdge* he : v->otherHalfEdges())
+		{
+			if (he->name() == name)
+				res = he;
+		}
 	}
-}
-
-void Mesh::remove(Face* f)
-{
-	int index = m_faces.indexOf(f);
-
-	if (index >= 0)
-		m_faces.remove(index);
-}
-
-HalfEdge* Mesh::findByName(const QString& name)
-{
-	HalfEdge* res = nullptr;
-
-	if (m_map.contains(name))
-		res = m_halfEdges.at(m_map[name]);
 
 	return res;
 }
 
-void Mesh::reset()
+void he::Mesh::remove(Vertex* v)
 {
-	//unallocate each face
-	for (Face* f : qAsConst(m_faces))
+	auto it = std::find(m_vertices.begin(), m_vertices.end(), v);
+
+	if (it != m_vertices.end())
+		m_vertices.erase(it);
+}
+
+void he::Mesh::remove(HalfEdge* he)
+{
+	auto it = std::find(m_halfEdges.begin(), m_halfEdges.end(), he);
+
+	if (it != m_halfEdges.end())
+		m_halfEdges.erase(it);
+}
+
+void he::Mesh::remove(Face* f)
+{
+	auto it = std::find(m_faces.begin(), m_faces.end(), f);
+
+	if (it != m_faces.end())
+		m_faces.erase(it);
+}
+
+void he::Mesh::reset()
+{
+	//free each face
+	for (he::Face* f : m_faces)
+	{
 		if (f != nullptr)
 		{
 			delete f;
 			f = nullptr;
 		}
+	}
 
 	//clear the vector
 	m_faces.clear();
 
-	//unallocate each vertex
-	for (Vertex* v : qAsConst(m_vertices))
+	//free each vertex
+	for (he::Vertex* v : m_vertices)
+	{
 		if (v != nullptr)
 		{
 			delete v;
 			v = nullptr;
 		}
+	}
 
 	//clear the vector
 	m_vertices.clear();
 
-	//unallocate each halfedge
-	for (HalfEdge* he : qAsConst(m_halfEdges))
+	//free each half-edge
+	for (he::HalfEdge* he : m_halfEdges)
+	{
 		if (he != nullptr)
 		{
 			delete he;
 			he = nullptr;
 		}
+	}
 
 	//clear the vector
 	m_halfEdges.clear();
-	//clear the map
-	m_map.clear();
+
+	m_halfEdgesNotTwin.clear();
+}
+
+QString he::Mesh::toString() const
+{
+	QString res = "Faces :\n";
+
+	for (he::Face const* f : this->m_faces)
+		res += f->name() + ", ";
+
+	res += "\nHalfEdges :\n";
+
+	for (he::HalfEdge const* h : this->m_halfEdges)
+		res += h->name() + ", ";
+
+	res += "\nVertices :\n";
+
+	for (he::Vertex const* v : this->m_vertices)
+		res += v->name() + ", ";
+
+	return res;
 }

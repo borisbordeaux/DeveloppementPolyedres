@@ -132,7 +132,7 @@ void GLView::meshChanged()
 	update();
 }
 
-void GLView::setViewFace(Face* f)
+void GLView::setViewFace(he::Face* f)
 {
 	//set f as view face only if it is not a tab
 	if (f != nullptr)

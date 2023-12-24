@@ -2,94 +2,82 @@
 #define VERTEX_H
 
 #include <QString>
+#include <QVector>
+#include <QVector3D>
 
-class HalfEdge;
-
-class Vertex
+namespace he
 {
-public:
-	/**
-	 * @brief Construct a Vertex with its 3 params
-	 * @param x the x value of the vertex
-	 * @param y the y value of the vertex
-	 * @param z the z value of the vertex
-	 */
-	Vertex(float x, float y, float z, QString name = "");
 
-	/**
-	 * @brief getter
-	 * @return the x value of the vertex
-	 */
-	float x() const;
+	class HalfEdge;
 
-	/**
-	 * @brief setter
-	 * @param x the x value of the vertex
-	 */
-	void setX(float x);
+	class Face;
 
-	/**
-	 * @brief getter
-	 * @return the y value of the vertex
-	 */
-	float y() const;
+	class Vertex
+	{
+	public:
+		/**
+		 * @brief Construct a Vertex with its 3 params
+		 * @param x the x value of the vertex
+		 * @param y the y value of the vertex
+		 * @param z the z value of the vertex
+		 */
+		Vertex(float x, float y, float z, QString name = "");
 
-	/**
-	 * @brief setter
-	 * @param ythe y value of the vertex
-	 */
-	void setY(float y);
+		/**
+		 * @brief getter
+		 * @return the position of this vertex
+		 */
+		QVector3D pos() const;
 
-	/**
-	 * @brief getter
-	 * @return the z value of the vertex
-	 */
-	float z() const;
+		float x() {return m_pos.x();}
+		float y() {return m_pos.y();}
+		float z() {return m_pos.z();}
 
-	/**
-	 * @brief setter
-	 * @param z the z value of the vertex
-	 */
-	void setZ(float z);
+		/**
+		 * setter
+		 * @param pos the new position of the vertex
+		 */
+		void setPos(QVector3D const& pos);
 
-	/**
-	 * @brief getter
-	 * @return a halfedge from which this point is its origin
-	 */
-	HalfEdge* halfEdge();
+		/**
+		 * @brief getter
+		 * @return a half-edge from which this point is its origin
+		 */
+		he::HalfEdge* halfEdge();
 
-	/**
-	 * @brief setter
-	 * @param halfEdge a halfedge that have this point as origin
-	 */
-	void setHalfEdge(HalfEdge* halfEdge);
+		/**
+		 * @brief setter
+		 * @param halfEdge a half-edge that have this point as origin
+		 */
+		void setHalfEdge(he::HalfEdge* halfEdge);
 
-	/**
-	 * @brief getter
-	 * @return the name of this vertex
-	 */
-	QString name() const;
+		/**
+		 * @brief getter
+		 * @return the name of this vertex
+		 */
+		QString name() const;
 
-	/**
-	 * @brief setter
-	 * @param name the name to set to this vertex
-	 */
-	void setName(const QString& name);
+		std::size_t degree() const;
 
-	/**
-	 * @brief tests if the vertices are at the same position
-	 * @param other the vertex that has to be tested
-	 * @return true if the vertices has the same position, false otherwise
-	 */
-	bool equals(Vertex* other);
+		std::vector<he::Face*> getAllFacesAroundVertex(he::Face* f) const;
 
-private:
-	//coordinates of this vertex
-	float m_x, m_y, m_z;
-	//a halfedge from which this point is its origin
-	HalfEdge* m_halfEdge;
-	//name of the vertex
-	QString m_name;
-};
+		void addHalfEdge(he::HalfEdge* halfEdge);
+		QVector<he::HalfEdge*>& otherHalfEdges();
 
-#endif // VERTEX_H
+		bool equals(he::Vertex* other);
+
+
+	private:
+		//coordinates of this vertex
+		QVector3D m_pos;
+		//a half-edge from which this point is the origin
+		he::HalfEdge* m_halfEdge;
+		//all other half-edges from which this point is the origin
+		QVector<he::HalfEdge*> m_otherHalfEdges;
+		//name of the vertex
+		QString m_name;
+	};
+
+} // poly
+
+#endif //VERTEX_H

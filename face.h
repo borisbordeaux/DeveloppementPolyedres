@@ -1,60 +1,66 @@
 #ifndef FACE_H
 #define FACE_H
 
+#include <QString>
 #include <QVector3D>
 
-class HalfEdge;
-
-class Face
+namespace he
 {
-public:
-	/**
-	 * @brief Construct a Face with one halfedge
-	 * @param halfEdge the halfedge the face will use
-	 */
-	Face(QString name = "", HalfEdge* halfEdge = nullptr);
 
-	/**
-	 * @brief getter
-	 * @return the halfedge associated to this Face
-	 */
-	HalfEdge* halfEdge();
-	/**
-	 * @brief setter
-	 * @param halfEdge the halfedge that has to be
-	 * associated to this Face
-	 */
-	void setHalfEdge(HalfEdge* halfEdge);
+	class HalfEdge;
 
-	/**
-	 * @brief getter
-	 * @return the name of this face
-	 */
-	QString name() const;
+	class Face
+	{
+	public:
+		/**
+		 * @brief Construct a Face with one half-edge
+		 * @param halfEdge the half-edge the face will use
+		 */
+		explicit Face(QString name = "", he::HalfEdge* halfEdge = nullptr);
 
-	/**
-	 * @brief setter
-	 * @param name the name to set to this face
-	 */
-	void setName(const QString& name);
+		/**
+		 * @brief getter
+		 * @return the half-edge associated to this Face
+		 */
+		he::HalfEdge* halfEdge();
+		/**
+		 * @brief setter
+		 * @param halfEdge the half-edge that has to be
+		 * associated to this Face
+		 */
+		void setHalfEdge(he::HalfEdge* halfEdge);
 
-	/**
-	 * @brief compute the normal of the face
-	 * @return the normalized normal of the face
-	 */
-	QVector3D computeNormal();
+		/**
+		 * @brief getter
+		 * @return the name of this face
+		 */
+		QString name() const;
 
-	/**
-	 * @brief compute the center of the face
-	 * @return the center of the face
-	 */
-	QVector3D getCenter();
+		/**
+		 * @brief compute the normal of the face
+		 * @return the normalized normal of the face
+		 */
+		QVector3D computeNormal();
 
-private:
-	//the name of the face
-	QString m_name;
-	//the halfedge of the face
-	HalfEdge* m_halfEdge;
-};
+		std::size_t nbEdges() const;
 
-#endif // FACE_H
+		std::vector<he::HalfEdge*> allHalfEdges() const;
+
+		float area();
+
+		/**
+         * @brief compute the center of the face
+         * @return the center of the face
+         */
+		QVector3D getCenter();
+
+	private:
+		//the name of the face
+		QString m_name;
+		//the half-edge of the face
+		he::HalfEdge* m_halfEdge;
+	};
+
+}
+
+#endif //FACE_H

@@ -62,7 +62,7 @@ void MainWindow::openMesh(QString& path)
 	m_net.setSelected(-1);
 
 	//read the obj file
-	OBJReader::readOBJ(path, &m_polyhedronMesh);
+	OBJReader::readOBJ(path, m_polyhedronMesh);
 
 	//create the net
 	m_netControler.createNet(m_polyhedronMesh, m_netMesh);

@@ -27,7 +27,7 @@ void Model::updateData()
 	int ID = 0;
 
 	//for each face
-	for (Face* f : m_mesh->faces())
+	for (he::Face* f : m_mesh->faces())
 	{
 		addFace(f, ID);
 		//going to the next face
@@ -59,7 +59,7 @@ void Model::updateDataEdge()
 	int ID = 1;
 
 	//for each halfedge
-	for (HalfEdge* he : m_mesh->halfEdges())
+	for (he::HalfEdge* he : m_mesh->halfEdges())
 	{
 		//we will display a line
 		float x1 = he->origin()->x();
@@ -131,12 +131,12 @@ int Model::findNbOfTriangle() const
 	int nb = 0;
 
 	//for each face
-	for (Face* f : m_mesh->faces())
+	for (he::Face* f : m_mesh->faces())
 	{
 		//we find the number of vertices of the face
 		int nbVertices = 1;
-		HalfEdge* he = f->halfEdge();
-		HalfEdge* heNext = he->next();
+		he::HalfEdge* he = f->halfEdge();
+		he::HalfEdge* heNext = he->next();
 
 		while (he != heNext)
 		{
@@ -157,7 +157,7 @@ int Model::findNbOfEdges() const
 	return m_mesh->halfEdges().size();
 }
 
-void Model::setMesh(Mesh* mesh)
+void Model::setMesh(he::Mesh* mesh)
 {
 	m_mesh = mesh;
 	//reset the selected face and edge
@@ -176,9 +176,9 @@ int Model::indexSelectedFace() const
 	return m_selectedFace;
 }
 
-Face* Model::selectedFace()
+he::Face* Model::selectedFace()
 {
-	Face* res = nullptr;
+	he::Face* res = nullptr;
 
 	if (m_selectedFace >= 0 && m_selectedFace < m_mesh->faces().size())
 		res = m_mesh->faces().at(m_selectedFace);
@@ -196,11 +196,11 @@ int Model::selectedEdge() const
 	return m_selectedEdge;
 }
 
-void Model::addFace(Face* f, int ID)
+void Model::addFace(he::Face *f, int ID)
 {
 	//we compute the number of halfedges
-	HalfEdge* he = f->halfEdge();
-	HalfEdge* temp = f->halfEdge()->next();
+	he::HalfEdge* he = f->halfEdge();
+	he::HalfEdge* temp = f->halfEdge()->next();
 	int nbHe = 1;
 
 	while (temp != he)

@@ -24,7 +24,7 @@ NetControler::~NetControler()
 	m_parent.clear();
 }
 
-void NetControler::createNet(Mesh& mesh, Mesh& net)
+void NetControler::createNet(he::Mesh& mesh, he::Mesh& net)
 {
 	//clear all maps and list
 	m_baseRotation.clear();
@@ -39,20 +39,23 @@ void NetControler::createNet(Mesh& mesh, Mesh& net)
 	//set the net mesh
 	m_net = &net;
 
+	qDebug() << "net creation";
+
 	//create each face of the net, but separately
 	//with no common vertex with any other face
 	//it will simplify the movement of the faces
-	for (Face* f : mesh.faces())
+	for (he::Face* f : mesh.faces())
 	{
-		HalfEdge* baseHe = f->halfEdge();
-		HalfEdge* meshHe = f->halfEdge();
-		int heCount = m_net->halfEdges().length();
-		Face* newFace = new Face(f->name());
+		qDebug() << "Face" << f->name();
+		he::HalfEdge* baseHe = f->halfEdge();
+		he::HalfEdge* meshHe = f->halfEdge();
+		int heCount = m_net->halfEdges().size();
+		he::Face* newFace = new he::Face(f->name());
 
 		do
 		{
-			Vertex* v = new Vertex(meshHe->origin()->x(), meshHe->origin()->y(), meshHe->origin()->z());
-			HalfEdge* he = new HalfEdge(v, QString::number(heCount));
+			he::Vertex* v = new he::Vertex(meshHe->origin()->x(), meshHe->origin()->y(), meshHe->origin()->z());
+			he::HalfEdge* he = new he::HalfEdge(v, QString::number(heCount));
 			he->setFace(newFace);
 
 			if (newFace->halfEdge() == nullptr)
@@ -62,36 +65,46 @@ void NetControler::createNet(Mesh& mesh, Mesh& net)
 			v->setHalfEdge(he);
 			m_net->append(v);
 			m_net->append(he);
+
 			meshHe = meshHe->next();
 		}
 		while (meshHe != baseHe);
+
+		qDebug() << "end creation of face";
 
 		//wa add the face
 		m_net->append(newFace);
 
 		//set next and prev for halfedges
-		for (int i = heCount; i < m_net->halfEdges().length(); i++)
+		for (int i = heCount; i < m_net->halfEdges().size(); i++)
 		{
-			int indexNext = i == m_net->halfEdges().length() - 1 ? heCount : i + 1;
-			int indexPrev = i == heCount ? m_net->halfEdges().length() - 1 : i - 1;
+			int indexNext = i == m_net->halfEdges().size() - 1 ? heCount : i + 1;
+			int indexPrev = i == heCount ? m_net->halfEdges().size() - 1 : i - 1;
 			m_net->halfEdges().at(i)->setNext(m_net->halfEdges().at(indexNext));
 			m_net->halfEdges().at(i)->setPrev(m_net->halfEdges().at(indexPrev));
 		}
+
+		qDebug() << "update next and prev";
 	}
 
+	qDebug() << "end net creation";
+
 	//associate twin HE
-	for (HalfEdge* he : m_net->halfEdges())
+	for (he::HalfEdge* he : m_net->halfEdges())
 		if (he->twin() == nullptr)
-			for (HalfEdge* he2 : m_net->halfEdges())
+			for (he::HalfEdge* he2 : m_net->halfEdges())
 				if (he2 != he && he->origin()->equals(he2->next()->origin()) && he->next()->origin()->equals(he2->origin()))
 				{
 					he->setTwin(he2);
 					he2->setTwin(he);
 				}
 
+	qDebug() << "end association twin he";
 
 	//merge adjacent faces with same normal
-	simplifyNet();
+	//simplifyNet();
+
+	qDebug() << "before creating tree";
 
 	//define the spanning tree for the net
 	//so define for each face its parent face
@@ -116,7 +129,7 @@ void NetControler::open(int percent)
 
 		//this QHash will contain all
 		//transformation for all faces
-		QHash<Face*, QMatrix4x4> transformedFaces;
+		QHash<he::Face*, QMatrix4x4> transformedFaces;
 
 		//by default, we say that the root face is transformed
 		//and its transformation is identity (no change)
@@ -127,7 +140,7 @@ void NetControler::open(int percent)
 		while (transformedFaces.size() != m_net->faces().size())
 
 			//we look at each face
-			for (Face* f : m_net->faces())
+			for (he::Face* f : m_net->faces())
 
 				//if a face is not transformed but his parent is transformed
 				if (!transformedFaces.contains(f) && transformedFaces.contains(m_parent[f]))
@@ -158,7 +171,7 @@ void NetControler::updateRootFace()
 		createTree();
 }
 
-void NetControler::translateFace(Face* f)
+void NetControler::translateFace(he::Face* f)
 {
 	//translation is possible only if it's not the root face
 	if (f != m_rootFace && f->name().compare("tab") != 0)
@@ -200,7 +213,7 @@ void NetControler::translateFace(Face* f)
 	}
 }
 
-void NetControler::setFaceAsLocalRoot(Face* f)
+void NetControler::setFaceAsLocalRoot(he::Face* f)
 {
 	//can't set a tab as local root
 	if (f->name().compare("tab") != 0)
@@ -221,40 +234,43 @@ void NetControler::setFaceAsLocalRoot(Face* f)
 	}
 }
 
-void NetControler::setFaceAsLocalRoot(Face* f, bool rewriteParent)
+void NetControler::setFaceAsLocalRoot(he::Face* f, bool rewriteParent)
 {
 	//can't set a tab as local root
 	if (f->name().compare("tab") != 0)
 	{
-		HalfEdge* faceHe = f->halfEdge();
-		HalfEdge* tempHe = f->halfEdge();
+		he::HalfEdge* faceHe = f->halfEdge();
+		he::HalfEdge* tempHe = f->halfEdge();
 
 		do
 		{
-			//if the neighbor face doesn't have a parent and is not the root face
-			if ((!m_parent.contains(tempHe->twin()->face()) || rewriteParent) && tempHe->twin()->face() != m_rootFace)
+			if (tempHe->twin() != nullptr)
 			{
-				bool canSetParent = false;
-
-				if (m_parent.contains(f))
+				//if the neighbor face doesn't have a parent and is not the root face
+				if ((!m_parent.contains(tempHe->twin()->face()) || rewriteParent) && tempHe->twin()->face() != m_rootFace)
 				{
-					if (m_parent[f] != tempHe->twin()->face())
+					bool canSetParent = false;
+
+					if (m_parent.contains(f))
+					{
+						if (m_parent[f] != tempHe->twin()->face())
+							canSetParent = true;
+
+						//be sure that it doesn't create a loop
+						if (findLoop(tempHe->twin()->face(), f))
+							canSetParent = false;
+					}
+					else
 						canSetParent = true;
 
-					//be sure that it doesn't create a loop
-					if (findLoop(tempHe->twin()->face(), f))
-						canSetParent = false;
-				}
-				else
-					canSetParent = true;
-
-				//if the parent can be set
-				if (canSetParent)
-				{
-					//update maps
-					m_parent[tempHe->twin()->face()] = f;
-					m_baseRotation[tempHe->twin()->face()] = tempHe->twin();
-					m_angles[tempHe->twin()->face()] = angleBetweenFaces(f, tempHe->twin()->face(), tempHe->twin());
+					//if the parent can be set
+					if (canSetParent)
+					{
+						//update maps
+						m_parent[tempHe->twin()->face()] = f;
+						m_baseRotation[tempHe->twin()->face()] = tempHe->twin();
+						m_angles[tempHe->twin()->face()] = angleBetweenFaces(f, tempHe->twin()->face(), tempHe->twin());
+					}
 				}
 			}
 
@@ -264,12 +280,12 @@ void NetControler::setFaceAsLocalRoot(Face* f, bool rewriteParent)
 	}
 }
 
-bool NetControler::findLoop(Face* child, Face* parent) const
+bool NetControler::findLoop(he::Face* child, he::Face* parent) const
 {
 	//we have to verify that in the parents of the face "parent" there is not
 	//the potential child (if the child is not the root face)
 	bool loop = false;
-	Face* temp = m_parent[parent];
+	he::Face* temp = m_parent[parent];
 
 	while (temp != m_rootFace && temp != child && m_parent.contains(temp))
 		temp = m_parent[temp];
@@ -297,18 +313,27 @@ void NetControler::createTree()
 	//define which face is the root
 	m_rootFace = m_model->selectedFace() == nullptr ? m_net->faces().at(0) : m_model->selectedFace();
 
+	bool change = true;
+
 	//associate each face a parent : create a tree
-	while (m_parent.size() != m_net->faces().size() - 1)
+	while (m_parent.size() != m_net->faces().size() - 1 && change)
+	{
+		change = false;
+		qsizetype oldSize = m_parent.size();
+		qDebug() << "inside loop, size of parent is" << m_parent.size() << "and size of faces is" << m_net->faces().size() - 1;
 
 		//if there is no parent, we add the root face
 		if (m_parent.isEmpty())
 			setFaceAsLocalRoot(m_rootFace, false);
 		else
-			for (Face* f : m_parent.keys())
+			for (he::Face* f : m_parent.keys())
 				setFaceAsLocalRoot(f, false);
+
+		change = oldSize != m_parent.size();
+	}
 }
 
-QMatrix4x4 NetControler::transform(Face* f, int percent, QMatrix4x4 parentTransform)
+QMatrix4x4 NetControler::transform(he::Face* f, int percent, QMatrix4x4 parentTransform)
 {
 	//get the origin and the vector of rotation
 	QVector3D origin(m_baseRotation[f]->origin()->x(), m_baseRotation[f]->origin()->y(), m_baseRotation[f]->origin()->z());
@@ -335,13 +360,13 @@ QMatrix4x4 NetControler::transform(Face* f, int percent, QMatrix4x4 parentTransf
 
 	//after the determination of the transform
 	//we have to apply it to the vertices of the face
-	HalfEdge* faceHe = f->halfEdge();
-	HalfEdge* tempHe = f->halfEdge();
+	he::HalfEdge* faceHe = f->halfEdge();
+	he::HalfEdge* tempHe = f->halfEdge();
 
 	do
 	{
 		//get the vertex
-		Vertex* v = tempHe->origin();
+		he::Vertex* v = tempHe->origin();
 		//set it in 4D
 		QVector4D vec4(v->x(), v->y(), v->z(), 1.0f);
 
@@ -349,9 +374,7 @@ QMatrix4x4 NetControler::transform(Face* f, int percent, QMatrix4x4 parentTransf
 		vec4 = transformation * vec4;
 
 		//set new values to the vertex
-		v->setX(vec4.x());
-		v->setY(vec4.y());
-		v->setZ(vec4.z());
+		v->setPos(vec4.toVector3D());
 
 		//go to the next vertex
 		tempHe = tempHe->next();
@@ -362,7 +385,7 @@ QMatrix4x4 NetControler::transform(Face* f, int percent, QMatrix4x4 parentTransf
 	return transformation;
 }
 
-float NetControler::angleBetweenFaces(Face* f1, Face* f2, HalfEdge* rotationAxis)
+float NetControler::angleBetweenFaces(he::Face* f1, he::Face* f2, he::HalfEdge* rotationAxis)
 {
 	//get the normals of the faces
 	QVector3D n1 = f1->computeNormal();
@@ -403,11 +426,11 @@ void NetControler::simplifyNet()
 		change = false;
 
 		//for each face
-		for (Face* f : m_net->faces())
+		for (he::Face* f : m_net->faces())
 		{
 			//for each adjacent face
-			HalfEdge* he = f->halfEdge();
-			HalfEdge* heNext = he->next();
+			he::HalfEdge* he = f->halfEdge();
+			he::HalfEdge* heNext = he->next();
 
 			do
 			{
@@ -429,7 +452,7 @@ void NetControler::simplifyNet()
 	}
 }
 
-bool NetControler::haveSameNormal(Face* f1, Face* f2) const
+bool NetControler::haveSameNormal(he::Face* f1, he::Face* f2) const
 {
 	QVector3D n1 = f1->computeNormal();
 	QVector3D n2 = f2->computeNormal();
@@ -438,17 +461,17 @@ bool NetControler::haveSameNormal(Face* f1, Face* f2) const
 	return abs(n1.x() - n2.x()) < 0.001 && abs(n1.y() - n2.y()) < 0.001 && abs(n1.z() - n2.z()) < 0.001;
 }
 
-void NetControler::mergeFaces(Face* f1, Face* f2, HalfEdge* he)
+void NetControler::mergeFaces(he::Face* f1, he::Face* f2, he::HalfEdge* he)
 {
 	//merge faces and update the halfedge structure
-	HalfEdge* h1 = he->next();
-	HalfEdge* h2 = he->prev();
-	Vertex* A = he->origin();
-	HalfEdge* h4 = he->twin();
-	Vertex* B = h4->origin();
-	HalfEdge* h5 = h4->next();
-	Vertex* C = h5->origin();
-	HalfEdge* h6 = h4->prev();
+	he::HalfEdge* h1 = he->next();
+	he::HalfEdge* h2 = he->prev();
+	he::Vertex* A = he->origin();
+	he::HalfEdge* h4 = he->twin();
+	he::Vertex* B = h4->origin();
+	he::HalfEdge* h5 = h4->next();
+	he::Vertex* C = h5->origin();
+	he::HalfEdge* h6 = h4->prev();
 
 	h6->setNext(h1);
 	h1->setPrev(h6);
@@ -463,7 +486,7 @@ void NetControler::mergeFaces(Face* f1, Face* f2, HalfEdge* he)
 	m_net->remove(C);
 	m_net->remove(f2);
 
-	HalfEdge* temp = h1;
+	he::HalfEdge* temp = h1;
 	f1->setHalfEdge(h1);
 
 	do
@@ -474,7 +497,7 @@ void NetControler::mergeFaces(Face* f1, Face* f2, HalfEdge* he)
 	while (temp != h1);
 }
 
-void NetControler::addTabToHalfEdge(HalfEdge* he)
+void NetControler::addTabToHalfEdge(he::HalfEdge* he)
 {
 	//add he to the list of halfedge that will have a tab
 	m_heWithTab.append(he);
@@ -487,7 +510,7 @@ int NetControler::getPercentOpening()
 
 void NetControler::automaticallyAddTabs()
 {
-	for (HalfEdge* he : m_net->halfEdges())
+	for (he::HalfEdge* he : m_net->halfEdges())
 	{
 		if (he->twin() != nullptr)
 		{
@@ -507,7 +530,7 @@ void NetControler::automaticallyAddTabs()
 void NetControler::createTabs()
 {
 	//for each halfedge that should have a tab
-	for (HalfEdge* he : m_heWithTab)
+	for (he::HalfEdge* he : m_heWithTab)
 		//we create a tab
 		createTab(he);
 }
@@ -580,19 +603,19 @@ void NetControler::setTranslationValue(float value)
 void NetControler::removeTabs()
 {
 	//delete each face, vertex and halfedge created for tabs
-	for (Face* f : m_tabFaces)
+	for (he::Face* f : m_tabFaces)
 	{
 		m_net->remove(f);
 		delete f;
 	}
 
-	for (HalfEdge* he : m_tabHalfEdges)
+	for (he::HalfEdge* he : m_tabHalfEdges)
 	{
 		m_net->remove(he);
 		delete he;
 	}
 
-	for (Vertex* v : m_tabVertices)
+	for (he::Vertex* v : m_tabVertices)
 	{
 		m_net->remove(v);
 		delete v;
@@ -605,19 +628,19 @@ void NetControler::removeTabs()
 	m_heWithTab.clear();
 }
 
-void NetControler::createTab(HalfEdge* he)
+void NetControler::createTab(he::HalfEdge* he)
 {
 	//we need 1 face
-	Face* f = new Face("tab");
+	he::Face* f = new he::Face("tab");
 
 	//we need 4 vertices
-	Vertex* v1 = new Vertex(he->next()->origin()->x(),
-	                        he->next()->origin()->y(),
-	                        he->next()->origin()->z());
+	he::Vertex* v1 = new he::Vertex(he->next()->origin()->x(),
+	                                he->next()->origin()->y(),
+	                                he->next()->origin()->z());
 
-	Vertex* v2 = new Vertex(he->origin()->x(),
-	                        he->origin()->y(),
-	                        he->origin()->z());
+	he::Vertex* v2 = new he::Vertex(he->origin()->x(),
+	                                he->origin()->y(),
+	                                he->origin()->z());
 
 	//we need to add a vertex on the same plane as the root face
 	//first we find a vertex to make a triangle
@@ -643,19 +666,19 @@ void NetControler::createTab(HalfEdge* he)
 
 	float part = m_tabLength / opp;
 
-	Vertex* v3 = new Vertex(triangleVertex.x()*part + v2->x() * (1 - part),
-	                        triangleVertex.y()*part + v2->y() * (1 - part),
-	                        triangleVertex.z()*part + v2->z() * (1 - part));
+	he::Vertex* v3 = new he::Vertex(triangleVertex.x()*part + v2->x() * (1 - part),
+	                                triangleVertex.y()*part + v2->y() * (1 - part),
+	                                triangleVertex.z()*part + v2->z() * (1 - part));
 
-	Vertex* v4 = new Vertex(triangleVertex.x()*part + v1->x() * (1 - part),
-	                        triangleVertex.y()*part + v1->y() * (1 - part),
-	                        triangleVertex.z()*part + v1->z() * (1 - part));
+	he::Vertex* v4 = new he::Vertex(triangleVertex.x()*part + v1->x() * (1 - part),
+	                                triangleVertex.y()*part + v1->y() * (1 - part),
+	                                triangleVertex.z()*part + v1->z() * (1 - part));
 
 	//4 halfedges
-	HalfEdge* he1 = new HalfEdge(v1);
-	HalfEdge* he2 = new HalfEdge(v2);
-	HalfEdge* he3 = new HalfEdge(v3);
-	HalfEdge* he4 = new HalfEdge(v4);
+	he::HalfEdge* he1 = new he::HalfEdge(v1);
+	he::HalfEdge* he2 = new he::HalfEdge(v2);
+	he::HalfEdge* he3 = new he::HalfEdge(v3);
+	he::HalfEdge* he4 = new he::HalfEdge(v4);
 
 	//next and prev
 	he1->setNext(he2);

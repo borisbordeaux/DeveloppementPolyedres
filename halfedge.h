@@ -3,98 +3,106 @@
 
 #include <QString>
 
-class Vertex;
-class Face;
-
-class HalfEdge
+namespace he
 {
-public:
-	/**
-	 * @brief Construct a halfedge with its origin
-	 * @param origin the orgin of the halfedge
-	 */
-	HalfEdge(Vertex* origin, QString name = "");
 
-	/**
-	 * @brief getter
-	 * @return the origin of the halfedge
-	 */
-	Vertex* origin();
+	class Vertex;
 
-	/**
-	 * @brief setter
-	 * @param origin the origin to set for this halfedge
-	 */
-	void setOrigin(Vertex* origin);
+	class Face;
 
-	/**
-	 * @brief getter
-	 * @return the face of this halfedge
-	 */
-	Face* face();
+	class HalfEdge
+	{
+	public:
+		/**
+		 * @brief Construct a half-edge with its origin
+		 * @param origin the origin of the half-edge
+		 */
+		explicit HalfEdge(he::Vertex* origin, QString name = "");
 
-	/**
-	 * @brief setter
-	 * @param face the face to set for this halfedge
-	 */
-	void setFace(Face* face);
+		/**
+		 * @brief getter
+		 * @return the origin of the half-edge
+		 */
+		he::Vertex* origin();
 
-	/**
-	 * @brief getter
-	 * @return the twin halfedge of this halfedge
-	 */
-	HalfEdge* twin();
+		/**
+		 * @brief setter
+		 * @param origin the origin to set for this half-edge
+		 */
+		void setOrigin(he::Vertex* origin);
 
-	/**
-	 * @brief setter
-	 * @param twin the twin halfedge to be set for this halfedge
-	 */
-	void setTwin(HalfEdge* twin);
+		/**
+		 * @brief getter
+		 * @return the face of this half-edge
+		 */
+		he::Face* face();
 
-	/**
-	 * @brief getter
-	 * @return the previous halfedge of this halfedge
-	 */
-	HalfEdge* prev();
+		/**
+		 * @brief setter
+		 * @param face the face to set for this half-edge
+		 */
+		void setFace(he::Face* face);
 
-	/**
-	 * @brief setter
-	 * @param prev the previous halfedge to be set for this halfedge
-	 */
-	void setPrev(HalfEdge* prev);
+		/**
+		 * @brief getter
+		 * @return the twin half-edge of this half-edge
+		 */
+		HalfEdge* twin();
 
-	/**
-	 * @brief getter
-	 * @return the next halfedge of this halfedge
-	 */
-	HalfEdge* next();
+		/**
+		 * @brief setter
+		 * @param twin the twin half-edge to be set for this half-edge
+		 */
+		void setTwin(HalfEdge* twin);
 
-	/**
-	 * @brief setter
-	 * @param next the next halfedge to be set for this halfedge
-	 */
-	void setNext(HalfEdge* next);
+		/**
+		 * @brief getter
+		 * @return the previous half-edge of this half-edge
+		 */
+		HalfEdge* prev();
 
-	/**
-	 * @brief getter
-	 * @return the name of this halfedge, represented by the vertices
-	 * it bind, in the order origine -> next.origin
-	 */
-	QString name() const;
+		/**
+		 * @brief setter
+		 * @param prev the previous half-edge to be set for this half-edge
+		 */
+		void setPrev(HalfEdge* prev);
 
-	/**
-	 * @brief setter
-	 * @param name the name to be set for this halfedge
-	 */
-	void setName(const QString& name);
+		/**
+		 * @brief getter
+		 * @return the next half-edge of this half-edge
+		 */
+		HalfEdge* next();
 
-private:
-	Vertex* m_origin;
-	Face* m_face;
-	HalfEdge* m_twin;
-	HalfEdge* m_prev;
-	HalfEdge* m_next;
-	QString m_name;
-};
+		/**
+		 * @brief setter
+		 * @param next the next half-edge to be set for this half-edge
+		 */
+		void setNext(HalfEdge* next);
 
-#endif // HALFEDGE_H
+		/**
+		 * @brief getter
+		 * @return the name of this half-edge, represented by the vertices
+		 * it bind, in the order origin -> next.origin
+		 */
+		[[nodiscard]] QString name() const;
+
+		/**
+		 * @brief setter
+		 * @param name the name to be set for this half-edge
+		 */
+		void setName(const QString& name);
+
+		float length() const;
+
+	private:
+		he::Vertex* m_origin;
+		he::Face* m_face;
+		HalfEdge* m_twin;
+		HalfEdge* m_prev;
+		HalfEdge* m_next;
+		QString m_name;
+	};
+
+} // poly
+
+#endif //HALFEDGE_H
