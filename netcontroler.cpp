@@ -39,14 +39,11 @@ void NetControler::createNet(he::Mesh& mesh, he::Mesh& net)
 	//set the net mesh
 	m_net = &net;
 
-	qDebug() << "net creation";
-
 	//create each face of the net, but separately
 	//with no common vertex with any other face
 	//it will simplify the movement of the faces
 	for (he::Face* f : mesh.faces())
 	{
-		qDebug() << "Face" << f->name();
 		he::HalfEdge* baseHe = f->halfEdge();
 		he::HalfEdge* meshHe = f->halfEdge();
 		int heCount = m_net->halfEdges().size();
@@ -70,8 +67,6 @@ void NetControler::createNet(he::Mesh& mesh, he::Mesh& net)
 		}
 		while (meshHe != baseHe);
 
-		qDebug() << "end creation of face";
-
 		//wa add the face
 		m_net->append(newFace);
 
@@ -83,11 +78,7 @@ void NetControler::createNet(he::Mesh& mesh, he::Mesh& net)
 			m_net->halfEdges().at(i)->setNext(m_net->halfEdges().at(indexNext));
 			m_net->halfEdges().at(i)->setPrev(m_net->halfEdges().at(indexPrev));
 		}
-
-		qDebug() << "update next and prev";
 	}
-
-	qDebug() << "end net creation";
 
 	//associate twin HE
 	for (he::HalfEdge* he : m_net->halfEdges())
@@ -99,12 +90,8 @@ void NetControler::createNet(he::Mesh& mesh, he::Mesh& net)
 					he2->setTwin(he);
 				}
 
-	qDebug() << "end association twin he";
-
 	//merge adjacent faces with same normal
 	//simplifyNet();
-
-	qDebug() << "before creating tree";
 
 	//define the spanning tree for the net
 	//so define for each face its parent face
@@ -320,7 +307,6 @@ void NetControler::createTree()
 	{
 		change = false;
 		qsizetype oldSize = m_parent.size();
-		qDebug() << "inside loop, size of parent is" << m_parent.size() << "and size of faces is" << m_net->faces().size() - 1;
 
 		//if there is no parent, we add the root face
 		if (m_parent.isEmpty())
@@ -421,33 +407,50 @@ void NetControler::simplifyNet()
 	//while a change has occured, then we have to simplify the net again
 	bool change = true;
 
+	qDebug() << "begin simplify net";
+
 	while (change)
 	{
 		change = false;
 
+		qDebug() << "there was a change";
+
 		//for each face
 		for (he::Face* f : m_net->faces())
 		{
+			qDebug() << "begin face" << f->name();
+
 			//for each adjacent face
 			he::HalfEdge* he = f->halfEdge();
 			he::HalfEdge* heNext = he->next();
 
 			do
 			{
+				qDebug() << "compare faces" << f->name() << "and" << heNext->twin()->face()->name();
+
 				//if the faces has same normal
-				if (haveSameNormal(f, heNext->twin()->face()))
+				if (f != heNext->twin()->face() && haveSameNormal(f, heNext->twin()->face()))
 				{
+					qDebug() << "they have same normal";
 					//they will be merged
 					mergeFaces(f, heNext->twin()->face(), heNext);
 
 					//update the halfedge for navigation
 					he = f->halfEdge();
+					heNext = he;
 					change = true;
+					qDebug() << "there is a change";
 				}
-
-				heNext = heNext->next();
+				else
+				{
+					qDebug() << "they don't have same normal";
+					heNext = heNext->next();
+				}
 			}
-			while (he != heNext);
+			while (!change && he != heNext);
+
+			if (change)
+				break;
 		}
 	}
 }
@@ -470,7 +473,6 @@ void NetControler::mergeFaces(he::Face* f1, he::Face* f2, he::HalfEdge* he)
 	he::HalfEdge* h4 = he->twin();
 	he::Vertex* B = h4->origin();
 	he::HalfEdge* h5 = h4->next();
-	he::Vertex* C = h5->origin();
 	he::HalfEdge* h6 = h4->prev();
 
 	h6->setNext(h1);
@@ -478,16 +480,16 @@ void NetControler::mergeFaces(he::Face* f1, he::Face* f2, he::HalfEdge* he)
 	h2->setNext(h5);
 	h5->setPrev(h2);
 	A->setHalfEdge(h5);
+	B->setHalfEdge(h1);
 	h5->setOrigin(A);
 
 	m_net->remove(he);
 	m_net->remove(h4);
-	m_net->remove(B);
-	m_net->remove(C);
 	m_net->remove(f2);
 
-	he::HalfEdge* temp = h1;
 	f1->setHalfEdge(h1);
+
+	he::HalfEdge* temp = h1;
 
 	do
 	{

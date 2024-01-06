@@ -1,13 +1,18 @@
 #include "mainwindow.h"
 
 #include <QFileDialog>
+#include <QGraphicsTextItem>
+#include <QGraphicsView>
 #include <QGuiApplication>
 #include <QKeyEvent>
 #include <QScreen>
 #include <QSlider>
 
+#include "face.h"
+#include "halfedge.h"
 #include "objreader.h"
 #include "ui_mainwindow.h"
+#include "vertex.h"
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::MainWindow),
@@ -83,15 +88,105 @@ void MainWindow::openFile(QString& path)
 	m_netView.meshChanged();
 }
 
+void displayFace(he::Face* f, QGraphicsScene* scene, QVector2D const& pos, float size)
+{
+	std::vector<QVector2D> positions;
+
+	// compute the new basis
+	QVector3D axeX = (f->halfEdge()->next()->origin()->pos() - f->halfEdge()->origin()->pos()).normalized();
+	QVector3D axeZ = f->computeNormal();
+	QVector3D axeY = QVector3D::crossProduct(axeZ, axeX);
+
+	// row major order
+	QMatrix4x4 invTransMat = QMatrix4x4(axeX.x(), axeY.x(), axeZ.x(), 0.0f,
+	                                    axeX.y(), axeY.y(), axeZ.y(), 0.0f,
+	                                    axeX.z(), axeY.z(), axeZ.z(), 0.0f,
+	                                    0.0f, 0.0f, 0.0f, 1.0f).inverted();
+
+	for (he::HalfEdge* he : f->allHalfEdges())
+		positions.push_back((invTransMat * QVector4D(he->origin()->pos())).toVector2D());
+
+	//compute barycenter
+	QVector2D barycenter = {0.0f, 0.0f};
+
+	for (std::size_t i = 0; i < positions.size(); i++)
+		barycenter += positions[i];
+
+	barycenter /= (float)positions.size();
+
+	//update positions to place the barycenter at the wanted pos
+	for (std::size_t i = 0; i < positions.size(); i++)
+	{
+		positions[i] -= barycenter;
+		positions[i] *= size;
+		positions[i] += pos;
+	}
+
+	//draw face on scene
+	for (std::size_t i = 0; i < positions.size(); i++)
+		scene->addLine(positions[i].x(), positions[i].y(), positions[(i + 1) % positions.size()].x(), positions[(i + 1) % positions.size()].y());
+}
+
+void MainWindow::display()
+{
+    if (gv == nullptr || !gv->isVisible())
+    {
+        gv = new QGraphicsView();
+        gv->setBackgroundBrush(Qt::white);
+        scene = new QGraphicsScene();
+        gv->setScene(scene);
+        gv->show();
+    }
+    else
+        scene->clear();
+
+    QVector2D currentPos = {0.0f, 0.0f};
+
+    for (he::Face* f : m_netMesh.faces())
+    {
+        displayFace(f, scene, currentPos, m_sizeSetting);
+        currentPos.setX(currentPos.x() + m_distanceFaceSetting);
+    }
+}
+
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
 	//close the window when Q is released
-    //or when back key on android is pressed
+	//or when back key on android is pressed
 	switch (event->key())
 	{
 		case Qt::Key_Q:
 		case Qt::Key_Back:
 			close();
+			break;
+
+		case Qt::Key_K:
+			qDebug() << m_netMesh.faces().size();
+			display();
+			break;
+
+		case Qt::Key_2:
+			m_sizeSetting += 10.0f;
+            display();
+			qDebug() << "new size is" << m_sizeSetting;
+			break;
+
+		case Qt::Key_1:
+			m_sizeSetting -= 10.0f;
+            display();
+			qDebug() << "new size is" << m_sizeSetting;
+			break;
+
+		case Qt::Key_5:
+			m_distanceFaceSetting += 10.0f;
+            display();
+			qDebug() << "new distance is" << m_distanceFaceSetting;
+			break;
+
+		case Qt::Key_4:
+			m_distanceFaceSetting -= 10.0f;
+            display();
+			qDebug() << "new distance is" << m_distanceFaceSetting;
 			break;
 	}
 }

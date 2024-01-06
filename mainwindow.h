@@ -11,6 +11,10 @@
 class QSlider;
 
 QT_BEGIN_NAMESPACE
+
+class QGraphicsView;
+
+class QGraphicsScene;
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
@@ -116,5 +120,12 @@ private:
 	SettingSlider m_angleSetting;
 	SettingSlider m_distanceSetting;
 	SettingSlider m_translationSetting;
+    
+    //for faces export
+    void display();
+    QGraphicsView* gv;
+    QGraphicsScene* scene;
+    float m_sizeSetting = 100.0f;
+    float m_distanceFaceSetting = 250.0f;
 };
 #endif // MAINWINDOW_H
