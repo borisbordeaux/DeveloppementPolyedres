@@ -1,33 +1,25 @@
 # DeveloppementPolyedres
 
-Projet tuteuré ayant pour but de visualiser le patron d'un
-polyèdre chargé au préalable par l'utilisateur.
-
-## A faire
-
-### Chargement d'un polyèdre
-    -lire un fichier .OBJ
-    -construire la structure en demi-arrête
-### Affichage du polyèdre
-    -A partir de la structure en demi-arrête,
-     afficher le polyèdre grâce à OpenGL
-### Construction du patron
-    -A partir de la structure en demi-arrête, modifier la
-     structure pour construire le patron du polyèdre en
-     découpant selon des arrêtes (ajout d'un bout de face
-     pour le collage des faces)
-### Affichage du patron
-    -A partir de la structure en demi-arrête du patron,
-     construire le patron et l'afficher grâce à OpenGL
-### Exporter le patron
-    -Exporter une image du patron entièrement déplié
+Projet tutoré ayant pour but de visualiser le patron d'un polyèdre chargé au préalable par l'utilisateur.
 
 ## Fonctionnalités
 
+### Chargement d'un polyèdre
+    -Lecture d'un fichier .OBJ
+    
+### Affichage du polyèdre
+    -Affichage 3D des faces et arêtes du polyèdre
+    
 ### Manipulation du polyèdre et de son patron
-    -A l'aide de la souris pour tourner le polyèdre
-    -A l'aide d'un slider pour plus ou moins déplier
-     le patron
+    -À l'aide de la souris pour tourner le polyèdre
+    -À l'aide d'un slider pour plus ou moins déplier le patron
+    
+### Construction du patron
+    -Découpage automatique du polyèdre selon certaines arêtes (ajout d'une facette pour le collage des faces)
+    -Possibilité d'indiquer que les arêtes d'une face ne soient pas découpées
+    
+### Exporter le patron
+    -Exportation dans une image de ce qui est affiché à l'écran
  
 ### Animation
-    -Possibilité d'animer le depliement du patron
+    -Possibilité d'animer le dépliement du patron
